@@ -1,0 +1,595 @@
+{
+ "files": [
+  {
+   "file": "BTCUSDT/BTCUSDT-1h-2025-09.zip",
+   "bytes": 42491,
+   "sha256": "b0ad5b54097f6adb440d07204fd215dae9b224fb73569fd4309a55c9234d46b3",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "BTCUSDT/BTCUSDT-1h-2025-10.zip",
+   "bytes": 44751,
+   "sha256": "5426b1b48905963d50e11d1243910b5fa05a89c9a2003bcd5082561d352a2123",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "BTCUSDT/BTCUSDT-1h-2025-11.zip",
+   "bytes": 43273,
+   "sha256": "1f28f02e33e1f19e5163cd45b67c07b3b75870e78dbbf9f861d1348ca372d942",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "BTCUSDT/BTCUSDT-1h-2025-12.zip",
+   "bytes": 43894,
+   "sha256": "d546c6e44b443e34cef5122043c5cdd3b9c76980e23cc408dafd9f6f76d65c05",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "BTCUSDT/BTCUSDT-1h-2026-01.zip",
+   "bytes": 43807,
+   "sha256": "a40e86beb4f1e6d4b19ca022c87b8b2f0e4e40874d349a5a75b27baa9634c858",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "BTCUSDT/BTCUSDT-1h-2026-02.zip",
+   "bytes": 40150,
+   "sha256": "0be4e5c92892495c5da5b371fe8755f2d508b28a58414b4171284480806ed6c4",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "BTCUSDT/BTCUSDT-1h-2026-03.zip",
+   "bytes": 44392,
+   "sha256": "44f383f9423f96cdc29e03b4ba8062296763dd740ab1d93f04b62c88bac30aa6",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "BTCUSDT/BTCUSDT-1h-2026-04.zip",
+   "bytes": 42394,
+   "sha256": "9f8e49b70978177414a005a6e84b1cf891f97b0196526cbd579535449c14b6f6",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "BTCUSDT/BTCUSDT-1h-2026-05.zip",
+   "bytes": 43547,
+   "sha256": "11b8537dc1769a7de9d6cb2e0354dd4a376018986a826c67d1078e25fbf8fb80",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "BTCUSDT/BTCUSDT-1h-2026-06.zip",
+   "bytes": 42265,
+   "sha256": "7c446aee297f382ee92b8d9b3300a1d7c21bed8166118f3bb261275bed5e308e",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "BTCUSDT/BTCUSDT-1h-2026-07.zip",
+   "bytes": 43238,
+   "sha256": "ec98553c10acdbf3f210c55045614e8d3daf616e407c36718269361b1e972b16",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "BTCUSDT/BTCUSDT-1h-2026-08.zip",
+   "bytes": 43110,
+   "sha256": "1fa85817e358f73e0dd9509f6f31c79bf9b23d9470971a882c8f814871a3fccf",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "BTCUSDT/BTCUSDT-1h-2026-09.zip",
+   "bytes": 41901,
+   "sha256": "39b31046d702bd7e482e03b125d6fbfd730147aa5d9ad03d8b04bf1961a8e9bd",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "BTCUSDT/BTCUSDT-1h-2026-10.zip",
+   "bytes": 43248,
+   "sha256": "da174c1563c8436f1700be3587800376f6edadfa12e28a142ac8a5dc53f2d1a3",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "ETHUSDT/ETHUSDT-1h-2025-09.zip",
+   "bytes": 40873,
+   "sha256": "f83ffff284b408574a4571e83fabc5c641e20edc71818912541cc38ec7e1be43",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "ETHUSDT/ETHUSDT-1h-2025-10.zip",
+   "bytes": 42832,
+   "sha256": "f3668059619d772ae8f7167d82666dcc6e2f88f17e6fd66a4a8098c9cd8ba042",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "ETHUSDT/ETHUSDT-1h-2025-11.zip",
+   "bytes": 41327,
+   "sha256": "3c0171cdd5eef1ece36c818ace3a07cc48e331cb9d991488a8db917bc496b78d",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "ETHUSDT/ETHUSDT-1h-2025-12.zip",
+   "bytes": 42005,
+   "sha256": "7a7a35ce7b9be9bafa0a00c47370acc57a48329a3289c21cb19f1185f6430fdb",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "ETHUSDT/ETHUSDT-1h-2026-01.zip",
+   "bytes": 41945,
+   "sha256": "eb060da7fb1adc65c7999f7d1f4f3b004edf2335311bb32d05a86f9577c21106",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "ETHUSDT/ETHUSDT-1h-2026-02.zip",
+   "bytes": 38274,
+   "sha256": "8c8c6e664688497711832add90349b8617caf7e8892f085e97fe4290989fe78b",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "ETHUSDT/ETHUSDT-1h-2026-03.zip",
+   "bytes": 41894,
+   "sha256": "0bf4dc37f2b201a8891f63dd76164742ed7d4fa24c24065a2e7709f34488ff74",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "ETHUSDT/ETHUSDT-1h-2026-04.zip",
+   "bytes": 40057,
+   "sha256": "46d62ed100717d8195bce4c07a41dc7606f41abc491ca71f9bfe653d2b92bfc0",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "ETHUSDT/ETHUSDT-1h-2026-05.zip",
+   "bytes": 41042,
+   "sha256": "8c4cef22ad7046183621f1a41155e91301780a3c9f377d7770763027b08e2462",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "ETHUSDT/ETHUSDT-1h-2026-06.zip",
+   "bytes": 40134,
+   "sha256": "e24954ab4ada9dc5f6bbf9ac30275d459a5729fb522f045f627296b4ad7ee985",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "ETHUSDT/ETHUSDT-1h-2026-07.zip",
+   "bytes": 40988,
+   "sha256": "5e8c974c008689943b473ccc5890707d0c2cd0b7e71bdb28c0ad65a87abde338",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "ETHUSDT/ETHUSDT-1h-2026-08.zip",
+   "bytes": 40869,
+   "sha256": "ebac99df5b1d9c84c56ea8f7a86daf09bcb43f8fdbded0049fec5205ab977dcc",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "ETHUSDT/ETHUSDT-1h-2026-09.zip",
+   "bytes": 40030,
+   "sha256": "04a3deb832f99c5f4e961c28baa4c6856b1f1cc5a7d887068aafeed6a717f4ac",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "ETHUSDT/ETHUSDT-1h-2026-10.zip",
+   "bytes": 41203,
+   "sha256": "1d89c6824d40f6a14f25df6e5a6a3e7f0710990f60c219d78b934446d44ce398",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "SOLUSDT/SOLUSDT-1h-2025-09.zip",
+   "bytes": 38047,
+   "sha256": "87ad6a05fe9d7fa90d4abd08cc3e6806759e9f3dcab69869fa3566d43bc876da",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "SOLUSDT/SOLUSDT-1h-2025-10.zip",
+   "bytes": 39348,
+   "sha256": "3cbcc4ed883fe75c9b095cb5981c810b39196b015940bff7cdd7fb6d68cb0865",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "SOLUSDT/SOLUSDT-1h-2025-11.zip",
+   "bytes": 37789,
+   "sha256": "311effa24632be0dfc523980554d876d5516e6acd6c08c7aa7daa3000ba393b9",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "SOLUSDT/SOLUSDT-1h-2025-12.zip",
+   "bytes": 38236,
+   "sha256": "d8259dd2f6758b7cd4166564bf8aa7219d6aa140ecf68a3667749da41d4c2560",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "SOLUSDT/SOLUSDT-1h-2026-01.zip",
+   "bytes": 38232,
+   "sha256": "949d8838cf48d6bd348762534e6307601574f82d58126dc26f0d91740622c27c",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "SOLUSDT/SOLUSDT-1h-2026-02.zip",
+   "bytes": 34633,
+   "sha256": "5e219b1a7d7384327e40b27b8accb7f1ae797f3c6ee628441de3035bc1fa3964",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "SOLUSDT/SOLUSDT-1h-2026-03.zip",
+   "bytes": 37896,
+   "sha256": "5bfab930f6e73e8a486ad1281de8df114d2c6a71cc08f7a449e6c6697af369b6",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "SOLUSDT/SOLUSDT-1h-2026-04.zip",
+   "bytes": 36216,
+   "sha256": "7266fae3d30b6b693bb731e7d392cdf132066b2e71a86b1695b0ab0c8a6b8507",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "SOLUSDT/SOLUSDT-1h-2026-05.zip",
+   "bytes": 37204,
+   "sha256": "bc33dc72343c662cb0614d4afe2ce7030ec7a4648d7c9a2dd1e99477e0001101",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "SOLUSDT/SOLUSDT-1h-2026-06.zip",
+   "bytes": 36564,
+   "sha256": "feb36f4d0a5bb0c13596b57d9477f60e7331cec8762b23102cb5ea188eddcdaf",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "SOLUSDT/SOLUSDT-1h-2026-07.zip",
+   "bytes": 36861,
+   "sha256": "62abffc3fdbf438465dc44432d16a1806e6c140ab3e1824ffceb908d831f67e2",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "SOLUSDT/SOLUSDT-1h-2026-08.zip",
+   "bytes": 37177,
+   "sha256": "fcec8b92044eb5a2cdcbfb038afce21bb8e02a06b18b1eaffc4ef88bacb1185e",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "SOLUSDT/SOLUSDT-1h-2026-09.zip",
+   "bytes": 36836,
+   "sha256": "3253ecc95e95ccac49036d4efb297e40906df5e1516f91b5288121e20457e343",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "SOLUSDT/SOLUSDT-1h-2026-10.zip",
+   "bytes": 37551,
+   "sha256": "3a69a17c4210265106863f63e1efeb2ea22d026efef97362a3a40c17e767a557",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "XRPUSDT/XRPUSDT-1h-2025-09.zip",
+   "bytes": 36774,
+   "sha256": "6e7cc11c407faa368c2215b8f5adad29afe6bb70c33c74aa5b23bf50dcfb9d20",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "XRPUSDT/XRPUSDT-1h-2025-10.zip",
+   "bytes": 38428,
+   "sha256": "4645b87ae8b4a3ab7c936b4ead2748e3ce9e3961208d4e40fbba897f63e39560",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "XRPUSDT/XRPUSDT-1h-2025-11.zip",
+   "bytes": 37154,
+   "sha256": "a411aedae1fb7140ab043885223a890a35b3887ffdba85f34437cf26b83937b3",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "XRPUSDT/XRPUSDT-1h-2025-12.zip",
+   "bytes": 37289,
+   "sha256": "c1f7afa290b1e8c4ef3bc84a3d992d779e636ad69ac700dd24a0847d2f704a49",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "XRPUSDT/XRPUSDT-1h-2026-01.zip",
+   "bytes": 37678,
+   "sha256": "31af99c0ea11a3b6d7e062e7755ba3240ea1369d2fc1c0b30fcfe0ca7d68b1b8",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "XRPUSDT/XRPUSDT-1h-2026-02.zip",
+   "bytes": 34376,
+   "sha256": "7fd13cd45c932ae481142213d4035df0ccce048a6dfb2e306c146746540ee2fd",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "XRPUSDT/XRPUSDT-1h-2026-03.zip",
+   "bytes": 37357,
+   "sha256": "fb697b2abd451ed92c624c457b021fdd38f589e84428ab25dca337d41617aa72",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "XRPUSDT/XRPUSDT-1h-2026-04.zip",
+   "bytes": 35448,
+   "sha256": "a6e372008a5940aba04f5a8aa86b75163657180b276aca365f87c993c0930e32",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "XRPUSDT/XRPUSDT-1h-2026-05.zip",
+   "bytes": 36615,
+   "sha256": "03a0520e027df25a9aaba468d585799c30458fbfba7b0588f6f7b3cf7013312c",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "XRPUSDT/XRPUSDT-1h-2026-06.zip",
+   "bytes": 35910,
+   "sha256": "1a923423f6574df3a2cf51c2ef44847d7df6b5d1a5ca8857d5eef75692143a77",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "XRPUSDT/XRPUSDT-1h-2026-07.zip",
+   "bytes": 36138,
+   "sha256": "7517ae48bfaa5db2f61682a24124b3e4e74f8c39803355a226ec4959086dd2fd",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "XRPUSDT/XRPUSDT-1h-2026-08.zip",
+   "bytes": 36638,
+   "sha256": "15a0e4239d81c22496a2a4845d32d76d4e657a3250ce9286d1fa757cda821c90",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "XRPUSDT/XRPUSDT-1h-2026-09.zip",
+   "bytes": 36522,
+   "sha256": "fa67d293f03a74d5bb8eb9bb13b0f0b966e254c1d114ed75281d8bd21d242acb",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "XRPUSDT/XRPUSDT-1h-2026-10.zip",
+   "bytes": 36821,
+   "sha256": "0d0c48c597ea792803206b4aa489730b6337685b84e3c03dd6679932b0af3e72",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "BNBUSDT/BNBUSDT-1h-2025-09.zip",
+   "bytes": 37216,
+   "sha256": "edb2ba0c725e932b6adb162a38470b29a0f3888a216a4663851de202b2c7937b",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "BNBUSDT/BNBUSDT-1h-2025-10.zip",
+   "bytes": 39912,
+   "sha256": "22b2595e7df28f89e12523fac0aaf14e742fbf7ab4ff8feb081201fe3f714edc",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "BNBUSDT/BNBUSDT-1h-2025-11.zip",
+   "bytes": 37434,
+   "sha256": "34eebef4cf7743a1d44567b9857eddc020c3a96b4c9aac65702a4537df72ae76",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "BNBUSDT/BNBUSDT-1h-2025-12.zip",
+   "bytes": 37761,
+   "sha256": "3d0d7dd68c548d3439ba773e1556a89911fff14af7aac9ed34d16090b85cad5e",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "BNBUSDT/BNBUSDT-1h-2026-01.zip",
+   "bytes": 37706,
+   "sha256": "c2524b2a5a48fa55cd6c8321118b7ad0de7ef83794344ccfd86d161e11b7c6a5",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "BNBUSDT/BNBUSDT-1h-2026-02.zip",
+   "bytes": 34270,
+   "sha256": "819761ffd58e265f471c4edbe5ffd2e7abbeb747a85a6b2c0cb389f921850f29",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "BNBUSDT/BNBUSDT-1h-2026-03.zip",
+   "bytes": 37443,
+   "sha256": "b80b2124644a48ce2fbf90cd2cedadfdf79aa2de72ac14d0dcd7c487fe75196c",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "BNBUSDT/BNBUSDT-1h-2026-04.zip",
+   "bytes": 35899,
+   "sha256": "4283e0a097dc65dbf0658744352086a46e0862023825f60d815da5ccd8f7f835",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "BNBUSDT/BNBUSDT-1h-2026-05.zip",
+   "bytes": 37290,
+   "sha256": "74aac29cedf0fc0b94a1bb7bb1b8ba3aebfef827da0c21be181884789dcef9ae",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "BNBUSDT/BNBUSDT-1h-2026-06.zip",
+   "bytes": 36368,
+   "sha256": "0c3b052bd921899ca8216f86cbd2830a8f20bc5725bcf49611486267fb704997",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "BNBUSDT/BNBUSDT-1h-2026-07.zip",
+   "bytes": 36678,
+   "sha256": "7257a39b939fce6c29ba7f44ae42fbec4517d18dacc2b3d27c9c536881af7d10",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "BNBUSDT/BNBUSDT-1h-2026-08.zip",
+   "bytes": 36987,
+   "sha256": "420f85b0f1440f209d4ac1aaecf1b0d91e165a18f4edea3de11695589d5578c7",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "BNBUSDT/BNBUSDT-1h-2026-09.zip",
+   "bytes": 36471,
+   "sha256": "caccd0ca4bd8b63257f402381e3a869a358943fd17f98a13d0f00c88aab21050",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "BNBUSDT/BNBUSDT-1h-2026-10.zip",
+   "bytes": 37116,
+   "sha256": "77600e455a4a415628276c6a3560f25d9a34f89bdeefb0435477505087110478",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "DOGEUSDT/DOGEUSDT-1h-2025-09.zip",
+   "bytes": 36955,
+   "sha256": "f8e656ae978eba09aa8980bdc5dc8912e4c5eb0311aa0b2cb4eee9feda6080ac",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "DOGEUSDT/DOGEUSDT-1h-2025-10.zip",
+   "bytes": 38245,
+   "sha256": "0ef51b722646174c57641fe6603a05b130afbe2f47df695f0f1d4c21ca04ca80",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "DOGEUSDT/DOGEUSDT-1h-2025-11.zip",
+   "bytes": 36536,
+   "sha256": "d576e47a290c7992a6392b7a3c3b3acc04427299f73cf95fd6894e4ddd75cff4",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "DOGEUSDT/DOGEUSDT-1h-2025-12.zip",
+   "bytes": 36605,
+   "sha256": "01c3cf92a955ea881cb0266a407a57e9cc082c2b1de24e6d5296ced7fc765f63",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "DOGEUSDT/DOGEUSDT-1h-2026-01.zip",
+   "bytes": 36926,
+   "sha256": "85a12aeff573262ae189ac7fff4e54f5513fefbfa67622d0b9e0f8b63f11fe86",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "DOGEUSDT/DOGEUSDT-1h-2026-02.zip",
+   "bytes": 33493,
+   "sha256": "e2bae3f3bda30259f64489e91c5b27af7fb5fd3e7c933a5c8424fbbc725f195e",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "DOGEUSDT/DOGEUSDT-1h-2026-03.zip",
+   "bytes": 36493,
+   "sha256": "11dfbfb5950e2677444bc930f7fe54ffa455602c3faa75267fc267be38f52c6f",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "DOGEUSDT/DOGEUSDT-1h-2026-04.zip",
+   "bytes": 35019,
+   "sha256": "bc53491c0dba0281dd0f4d169276fa6d54129ab32beb6e60bb9b634f748cf136",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "DOGEUSDT/DOGEUSDT-1h-2026-05.zip",
+   "bytes": 36312,
+   "sha256": "4bf9c05d5c36690932f5bee4d90e6ac36ad977d540f1e3ac10bf84a3f456b478",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "DOGEUSDT/DOGEUSDT-1h-2026-06.zip",
+   "bytes": 34959,
+   "sha256": "5a158fea8c3fee7a105445ecb9cfba6e8a2750d2fcf849677059b8f50ac84119",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "DOGEUSDT/DOGEUSDT-1h-2026-07.zip",
+   "bytes": 35106,
+   "sha256": "137c377cfe9d813f2abd6f416c584c85627ce8cc80b539912dd92b27cabf4dee",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "DOGEUSDT/DOGEUSDT-1h-2026-08.zip",
+   "bytes": 35235,
+   "sha256": "802b00c4ad87451236c912823e807eb5803d066c3403cc0202cc9af68929eda4",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "DOGEUSDT/DOGEUSDT-1h-2026-09.zip",
+   "bytes": 35292,
+   "sha256": "e2b23f627c05cfb11de42391ceb77f0232806636b13735b78413a868c08acfba",
+   "checksum_ok": true,
+   "status": "downloaded"
+  },
+  {
+   "file": "DOGEUSDT/DOGEUSDT-1h-2026-10.zip",
+   "bytes": 35705,
+   "sha256": "6ed0d13a64172d7a0e21b3dfa559e810b385996fad04623a66c4bd24d98ca273",
+   "checksum_ok": true,
+   "status": "downloaded"
+  }
+ ],
+ "count": 168,
+ "total_zip_bytes": 3233104,
+ "checksum_ok": 84
+}
