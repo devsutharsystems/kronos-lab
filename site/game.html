@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Kronos Lab: game</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="js/config.js" defer></script>
+  <script src="js/common.js" defer></script>
+  <script src="js/svg.js" defer></script>
+  <script src="js/game.js" defer></script>
+  <script src="js/game-ui.js" defer></script>
+</head>
+<body>
+  <div id="synthetic-banner" role="status" hidden></div>
+  <header class="site">
+    <h1>Game</h1>
+    <nav aria-label="Pages">
+    <a href="index.html">Result</a>
+    <a href="evidence.html">Evidence</a>
+    <a href="game.html" aria-current="page">Game</a>
+    <a href="method.html">Method</a>
+    <a href="limits.html">Limits</a>
+    </nav>
+  </header>
+  <main>
+    <p id="load-error" class="warn" role="alert" hidden></p>
+
+    <section aria-labelledby="h-game">
+      <h2 id="h-game">Can you beat the coin flip?</h2>
+      <p>You see recent hourly candles with the pair and date hidden. Call whether the close will end the forecast day above or below the dashed line. Then see what happened, what Kronos said, and what a coin flip said.</p>
+      <div class="card"><p id="progress" class="small"></p><div id="tallies" class="tallies" aria-label="Running tallies of correct calls"></div></div>
+      <div id="stage"></div>
+      <p id="live" class="small" aria-live="polite"></p>
+      <noscript><p class="warn">This page needs JavaScript.</p></noscript>
+    </section>
+
+  </main>
+  <footer>
+    <p>Not financial advice.</p>
+    <p>Data: Binance Vision (data.binance.vision), CC BY-NC-SA 4.0; not affiliated with or endorsed by Binance.</p>
+    <p><a data-prereg href="#">Pre-registration, committed before the main run</a></p>
+  </footer>
+</body>
+</html>

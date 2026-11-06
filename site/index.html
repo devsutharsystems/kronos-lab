@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Kronos Lab: result</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="js/config.js" defer></script>
+  <script src="js/common.js" defer></script>
+  <script src="js/index.js" defer></script>
+</head>
+<body>
+  <div id="synthetic-banner" role="status" hidden></div>
+  <header class="site">
+    <h1>Kronos Lab</h1>
+    <nav aria-label="Pages">
+    <a href="index.html" aria-current="page">Result</a>
+    <a href="evidence.html">Evidence</a>
+    <a href="game.html">Game</a>
+    <a href="method.html">Method</a>
+    <a href="limits.html">Limits</a>
+    </nav>
+  </header>
+  <main>
+    <p id="load-error" class="warn" role="alert" hidden></p>
+
+    <section aria-labelledby="h-result">
+      <h2 id="h-result">What the test found</h2>
+      <div class="card" aria-live="polite">
+        <p class="headline" id="headline-text">Loading</p>
+        <p class="warn" id="underpowered" hidden>Underpowered: too few usable origins to detect small effects. Read every result with that in mind.</p>
+        <p class="small" id="not-ruled-out" hidden></p>
+      </div>
+      <dl class="stats">
+        <dt>Origins scored (analysis set)</dt><dd data-bind="headline.n" data-fmt="int"></dd>
+        <dt>Primary horizon (bars ahead)</dt><dd data-bind="protocol.primary_horizon"></dd>
+        <dt>Kronos accuracy</dt><dd><span data-bind="primary.accuracy" data-fmt="pct"></span>, interval <span data-bind="primary.ci_accuracy" data-fmt="ci"></span></dd>
+        <dt>Always-up accuracy</dt><dd data-bind="primary.always_up_accuracy" data-fmt="pct"></dd>
+        <dt>Kronos minus always-up</dt><dd><span data-bind="primary.accuracy_diff" data-fmt="pp"></span>, interval <span data-bind="primary.ci_diff" data-fmt="cipp"></span></dd>
+        <dt>Versus a coin flip (exact test, Holm adjusted)</dt><dd data-bind="primary.p_h1_holm" data-fmt="p"></dd>
+        <dt>Versus always-up (exact test, Holm adjusted)</dt><dd data-bind="primary.p_h2_holm" data-fmt="p"></dd>
+        <dt>Kronos down-calls</dt><dd data-bind="headline.D" data-fmt="int"></dd>
+        <dt>Down-calls where Kronos was right and always-up wrong</dt><dd data-bind="primary.discordant_kronos_right_alwaysup_wrong" data-fmt="int"></dd>
+        <dt>Down-calls where Kronos was wrong and always-up right</dt><dd data-bind="primary.discordant_kronos_wrong_alwaysup_right" data-fmt="int"></dd>
+      </dl>
+      <p class="small">Intervals come from a bootstrap that resamples whole forecast days, so pairs that move together are not counted as independent evidence.</p>
+    </section>
+    <section aria-labelledby="h-power">
+      <h2 id="h-power">How small an edge could this test see?</h2>
+      <div id="power-table"></div>
+      <p class="small" id="power-down"></p>
+    </section>
+    <section aria-labelledby="h-plain">
+      <h2 id="h-plain">In plain English</h2>
+      <p>Kronos is a model trained to continue price candles. We asked one narrow question: given the recent past of a crypto pair, can it call the direction of the day better than a coin flip, and better than a rule that always says up? We wrote the test down before running it, ran it once on a fixed set of days, and report what it found, including when that is nothing.</p>
+      <p>The Evidence page shows how the numbers arise, the Game lets you try the same task, the Method page quotes the plan, and the Limits page lists what this cannot tell you.</p>
+    </section>
+
+  </main>
+  <footer>
+    <p>Not financial advice.</p>
+    <p>Data: Binance Vision (data.binance.vision), CC BY-NC-SA 4.0; not affiliated with or endorsed by Binance.</p>
+    <p><a data-prereg href="#">Pre-registration, committed before the main run</a></p>
+  </footer>
+</body>
+</html>

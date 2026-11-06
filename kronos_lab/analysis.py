@@ -32,6 +32,7 @@ PAIRS_DEFAULT = ["BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT", "BNBUSDT", "DOGEUSD
 Z_SUM = float(norm.ppf(1 - 0.025 / 2) + norm.ppf(0.80))   # 3.0830
 K_POWER = Z_SUM * 0.5                                        # 1.5415
 FEE_GRID_BPS = (0, 5, 10, 20)
+CTX_BARS_SHOWN = 72           # context bars shown in the site's game
 
 
 # ---------------------------------------------------------------- inputs
@@ -45,11 +46,18 @@ class Inputs:
     closes: np.ndarray      # (n, 11, 24) predicted closes per sample (NaN where missing)
     actual: np.ndarray      # (n, 3) real closes of bars h=1,4,24 (NaN if unavailable)
     ctx_tail: np.ndarray    # (n, 25) last 25 context closes, ending at last_close
+    # Optional, used only by the site builder (not by any statistic):
+    path: np.ndarray | None = None       # (n, 24) real closes of the 24 forecast-day bars (NaN if unavailable)
+    ctx_ohlc: np.ndarray | None = None   # (n, 72, 4) last 72 context bars: open, high, low, close
 
     def __post_init__(self):
         n = len(self.pair)
         assert self.closes.shape == (n, N_SAMPLES, PRED_LEN), self.closes.shape
         assert self.actual.shape == (n, 3) and self.ctx_tail.shape == (n, 25)
+        if self.path is not None:
+            assert self.path.shape == (n, PRED_LEN), self.path.shape
+        if self.ctx_ohlc is not None:
+            assert self.ctx_ohlc.shape == (n, CTX_BARS_SHOWN, 4), self.ctx_ohlc.shape
         for f in ("day", "stage", "status", "last_close"):
             assert len(getattr(self, f)) == n, f
 
@@ -367,8 +375,17 @@ def synthetic_inputs(seed: int = 1, skill: float = 0.0, rho: float = 0.5, sigma:
         bad = rng.random(n) < nan_frac
         status[bad] = "nan"
         closes[bad] = np.nan
+    # Extras for the site (drawn AFTER everything above so earlier synthetic numbers are unchanged):
+    step = sigma / math.sqrt(PRED_LEN)
+    back72 = np.cumsum(step * rng.standard_normal((n, CTX_BARS_SHOWN)), axis=1)             # steps back from last_close
+    cl = last[:, None] * np.exp(-np.concatenate([back72[:, ::-1][:, 1:], np.zeros((n, 1))], axis=1))  # closes, last = last_close
+    op = np.concatenate([cl[:, :1] * np.exp(step * rng.standard_normal((n, 1))), cl[:, :-1]], axis=1)
+    hi = np.maximum(op, cl) * (1 + 0.5 * step * np.abs(rng.standard_normal((n, CTX_BARS_SHOWN))))
+    lo = np.minimum(op, cl) * (1 - 0.5 * step * np.abs(rng.standard_normal((n, CTX_BARS_SHOWN))))
+    ctx_ohlc = np.stack([op, hi, lo, cl], axis=2)
     return Inputs(pair=np.array(pairs, dtype=object)[pair_i], day=day, stage=stage_of_index(day), status=status,
-                  last_close=last, closes=closes, actual=path[:, [0, 3, 23]], ctx_tail=tail)
+                  last_close=last, closes=closes, actual=path[:, [0, 3, 23]], ctx_tail=tail,
+                  path=path, ctx_ohlc=ctx_ohlc)
 
 
 # ---------------------------------------------------------------- REAL data: the only reader of results/runs and data/processed
@@ -389,6 +406,8 @@ def load_real_inputs(root) -> tuple[Inputs, dict]:
     closes = np.full((n, N_SAMPLES, PRED_LEN), np.nan)
     actual = np.full((n, 3), np.nan)
     tail = np.full((n, 25), np.nan)
+    path = np.full((n, PRED_LEN), np.nan)
+    ctx_ohlc = np.full((n, CTX_BARS_SHOWN, 4), np.nan)
     last = np.full(n, np.nan)
     day = np.zeros(n, dtype=int)
     for i, r in enumerate(recs):
@@ -409,7 +428,15 @@ def load_real_inputs(root) -> tuple[Inputs, dict]:
         want = o - 25 * D.HOUR_MS + D.HOUR_MS * np.arange(25)
         if k0 + 25 <= len(s) and np.array_equal(s.open_time[k0:k0 + 25], want):
             tail[i] = s.close[k0:k0 + 25]
+        kp = int(np.searchsorted(s.open_time, o))                       # the 24 bars of the forecast day
+        if kp + PRED_LEN <= len(s) and np.array_equal(s.open_time[kp:kp + PRED_LEN], o + D.HOUR_MS * np.arange(PRED_LEN)):
+            path[i] = s.close[kp:kp + PRED_LEN]
+        kc = int(np.searchsorted(s.open_time, o - CTX_BARS_SHOWN * D.HOUR_MS))   # the last 72 context bars
+        if kc + CTX_BARS_SHOWN <= len(s) and np.array_equal(
+                s.open_time[kc:kc + CTX_BARS_SHOWN], o - CTX_BARS_SHOWN * D.HOUR_MS + D.HOUR_MS * np.arange(CTX_BARS_SHOWN)):
+            ctx_ohlc[i] = np.column_stack([s.open[kc:kc + CTX_BARS_SHOWN], s.high[kc:kc + CTX_BARS_SHOWN],
+                                           s.low[kc:kc + CTX_BARS_SHOWN], s.close[kc:kc + CTX_BARS_SHOWN]])
     inp = Inputs(pair=np.array([r["pair"] for r in recs], dtype=object), day=day,
                  stage=np.array([r["stage"] for r in recs]), status=np.array([r["status"] for r in recs], dtype=object),
-                 last_close=last, closes=closes, actual=actual, ctx_tail=tail)
+                 last_close=last, closes=closes, actual=actual, ctx_tail=tail, path=path, ctx_ohlc=ctx_ohlc)
     return inp, {"done": done, "n_forecast_lines": n}

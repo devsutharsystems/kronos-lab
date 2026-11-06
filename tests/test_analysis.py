@@ -4,6 +4,7 @@
 import json
 import math
 from datetime import date, datetime, timezone
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -283,3 +284,33 @@ def test_load_real_inputs_parses_a_fake_finished_run(tmp_path):
     assert inp.actual[0, 0] == s.close[k] and inp.actual[0, 1] == s.close[k + 3] and inp.actual[0, 2] == s.close[k + 23]
     assert inp.ctx_tail[0, -1] == s.close[k - 1] and inp.ctx_tail[0, 0] == s.close[k - 25]
     assert np.isnan(inp.closes[1]).all()
+
+
+# ---- Phase 5, step 1a: analytic size of the exact two-sided binomial test --------------------------------
+def test_exact_binomial_test_size_at_n1000_is_at_most_five_percent():
+    from scipy.stats import binom
+    n = 1000
+    ks = np.arange(n + 1)
+    pmf = binom.pmf(ks, n, 0.5)
+    pvals = np.array([A.exact_binom_p(int(k), n) for k in ks])        # the very function the analysis uses
+    size = float(pmf[pvals <= 0.05].sum())                            # P(reject) under the null, exactly
+    print(f"ANALYTIC size of the two-sided exact binomial test, N={n}, p=0.5, alpha=0.05: {size:.6f}")
+    assert size <= 0.05
+    assert size > 0.03            # not absurdly conservative either
+
+
+# ---- Phase 5, amendment 2: primary results unchanged by the additive Inputs change -----------------------
+def test_primary_results_identical_to_pre_phase5_golden():
+    gold = json.loads((Path(__file__).parent / "golden" / "synthetic_primary_before_phase5.json").read_text())
+    for name, g in gold.items():
+        inp = A.synthetic_inputs(**g["kwargs"])
+        res = A.run_analysis(inp, B=g["B"])
+        got = A.clean({k: res["primary"][k] for k in g["primary"]})
+        assert got == g["primary"], name
+        assert A.clean(res["primary"]["exclusions_h24"]) == g["exclusions_h24"], name
+        # the new optional fields exist, have the right shape, and end at last_close
+        assert inp.path.shape == (len(inp), 24) and inp.ctx_ohlc.shape == (len(inp), 72, 4)
+        np.testing.assert_array_equal(inp.ctx_ohlc[:, -1, 3], inp.last_close)
+        np.testing.assert_array_equal(inp.path[:, [0, 3, 23]], inp.actual)
+        assert (inp.ctx_ohlc[:, :, 1] >= np.maximum(inp.ctx_ohlc[:, :, 0], inp.ctx_ohlc[:, :, 3])).all()
+        assert (inp.ctx_ohlc[:, :, 2] <= np.minimum(inp.ctx_ohlc[:, :, 0], inp.ctx_ohlc[:, :, 3])).all()

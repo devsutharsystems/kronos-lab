@@ -1,0 +1,98 @@
+{
+ "seed1_skill0.1_rho0.5": {
+  "kwargs": {
+   "seed": 1,
+   "skill": 0.1,
+   "rho": 0.5
+  },
+  "B": 2000,
+  "primary": {
+   "n": 2376,
+   "k_correct": 1329,
+   "accuracy": 0.5593434343434344,
+   "always_up_accuracy": 0.4781144781144781,
+   "accuracy_diff": 0.08122895622895623,
+   "discordant_kronos_right_alwaysup_wrong": 699,
+   "discordant_kronos_wrong_alwaysup_right": 506,
+   "kronos_down_calls_D": 1205,
+   "p_h1_raw": 7.864592797849e-09,
+   "p_h2_raw": 2.9822428956332436e-08,
+   "p_h1_holm": 1.5729185595698e-08,
+   "p_h2_holm": 2.9822428956332436e-08,
+   "ci_accuracy": [
+    0.5395622895622896,
+    0.5782828282828283
+   ],
+   "ci_diff": [
+    0.04755892255892256,
+    0.1148989898989899
+   ],
+   "naive_binomial_ci95": [
+    0.5391076213158065,
+    0.5794327476459918
+   ],
+   "decision_h1": "edge detected vs coin flip",
+   "decision_h2": "beats always-up",
+   "headline": "H1: edge detected vs coin flip. H2: beats always-up.",
+   "underpowered": false
+  },
+  "exclusions_h24": {
+   "n_total": 2376,
+   "n_status_ok": 2376,
+   "n_status_not_ok": 0,
+   "n_missing_actual_among_ok": 0,
+   "label_zero_excluded": 0,
+   "signal_zero_excluded": 0,
+   "n_used": 2376
+  }
+ },
+ "seed7_skill0.0_nan0.1": {
+  "kwargs": {
+   "seed": 7,
+   "skill": 0.0,
+   "rho": 0.3,
+   "nan_frac": 0.1,
+   "n_days": 120
+  },
+  "B": 2000,
+  "primary": {
+   "n": 641,
+   "k_correct": 329,
+   "accuracy": 0.5132605304212169,
+   "always_up_accuracy": 0.49453978159126366,
+   "accuracy_diff": 0.0187207488299532,
+   "discordant_kronos_right_alwaysup_wrong": 162,
+   "discordant_kronos_wrong_alwaysup_right": 150,
+   "kronos_down_calls_D": 312,
+   "p_h1_raw": 0.527444073893692,
+   "p_h2_raw": 0.5335147017233856,
+   "p_h1_holm": 1.0,
+   "p_h2_holm": 1.0,
+   "ci_accuracy": [
+    0.4745749217316204,
+    0.5504014678899083
+   ],
+   "ci_diff": [
+    -0.038765736675978664,
+    0.07692913385826769
+   ],
+   "naive_binomial_ci95": [
+    0.47380229210973274,
+    0.5525961281283602
+   ],
+   "decision_h1": "no detectable edge",
+   "decision_h2": "no detectable edge",
+   "headline": "UNDERPOWERED (N=641 < 1188). H1: no detectable edge. H2: no detectable edge.",
+   "underpowered": true
+  },
+  "exclusions_h24": {
+   "n_total": 720,
+   "n_status_ok": 641,
+   "n_status_not_ok": 79,
+   "n_missing_actual_among_ok": 0,
+   "label_zero_excluded": 0,
+   "signal_zero_excluded": 0,
+   "n_used": 641
+  }
+ }
+}
