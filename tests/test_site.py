@@ -47,7 +47,7 @@ def is_num(x):
 
 def test_site_json_matches_schema(site):
     assert set(site) == {"synthetic", "synthetic_meta", "protocol", "headline", "primary", "power", "results_table", "running_score",
-                         "featured", "game", "selection", "disclosures", "limits", "method"}
+                         "featured", "game", "selection", "disclosures", "limits", "method", "preamble", "deviations", "limit_notes"}
     assert site["synthetic"] is True and isinstance(site["synthetic_meta"], dict)
     p = site["protocol"]
     assert p["lookback"] == 512 and p["samples"] == 11 and p["pred_len"] == 24 and p["days"] == 396
@@ -206,8 +206,61 @@ def test_site_data_builder_refuses_forbidden_output_dirs(builder, tmp_path, monk
 def test_prereg_sections_parse():
     m = load_builder().prereg_sections((ROOT / "PREREGISTRATION.md").read_text())
     assert m[11] and m[2] and m[7] and any(x["level"] == 1 for x in m[7])
-    assert not any(x["text"].lstrip().startswith("|") for v in m.values() for x in v)        # table rows dropped (a "|" inside the seed formula is fine)
+    assert not any(x["text"].lstrip().startswith("|") for v in m.values() for x in v)        # table rows become table items (a "|" inside the seed formula is fine)
     assert any("|" in x["text"] for v in m.values() for x in v)                              # and the seed formula text is kept
+
+
+def test_every_pipe_table_in_the_preregistration_is_rendered(site, builder):
+    text = (ROOT / "PREREGISTRATION.md").read_text()
+    tables = builder.pipe_tables(text)
+    assert len(tables) >= 3
+    rendered = [x["table"] for k in sorted(site["method"], key=int) for x in site["method"][k] if x["level"] == -2]
+    assert len(rendered) == len(tables)
+    for want, got in zip(tables, rendered):                       # same order, same cells
+        assert got["header"] == want["header"] and got["rows"] == want["rows"]
+    # the hash cells really are in the page data
+    flat = " ".join(c for t in rendered for r in t["rows"] for c in r)
+    for h in re.findall(r"[0-9a-f]{64}", text.replace("`", "")):
+        if f"| {h}" in text.replace("`", "") or f"{h} |" in text.replace("`", ""):
+            assert h in flat
+
+
+def test_power_rows_equal_analysis_power_table(site):
+    want = A.power_table()["rows"]
+    got = site["power"]["rows"]
+    assert len(got) == len(want) == 3
+    for g, w in zip(got, want):
+        assert g["n"] == w["n"] and g["min_detectable_edge_pp"] == w["min_detectable_edge_pp"] and g["accuracy_needed"] == w["accuracy_needed"]
+
+
+def test_preamble_deviations_and_issue_note(site, builder):
+    assert site["preamble"].startswith("These statements were true when the pre-registration was committed (")
+    assert site["preamble"].endswith("They are quoted unchanged and describe the state before the run, not now.")
+    devs = builder.deviations((ROOT / "DEVIATIONS.md").read_text())
+    assert site["deviations"] == devs and len(devs) >= 1 and all(d["date"] and d["text"] for d in devs)
+    assert "sixth run-critical file" in " ".join(x["text"] for x in site["method"]["5"])      # the deviation sits after this section
+    assert any("issue #265" in t for t in site["limits"])                                    # quote untouched
+    assert site["limit_notes"][0]["text"].endswith("as of 5 Nov 2026.")
+
+
+def test_deviations_parser_handles_several_entries(builder):
+    t = "# Deviations\n\n## 2026-11-06 15:40:59 +0530: first\n\nBody one.\n\n## 2026-11-09 10:00:00 +0530: second\n\nBody two.\n"
+    d = builder.deviations(t)
+    assert [x["title"] for x in d] == ["first", "second"] and d[1]["date"] == "2026-11-09 10:00:00 +0530" and d[1]["text"] == "Body two."
+
+
+def test_phase6_layout_rules_in_css_and_pages():
+    css = (SITE / "style.css").read_text()
+    banner = re.search(r"#synthetic-banner \{[^}]*\}", css).group(0)
+    assert "position: sticky" in banner and "position: fixed" not in css and "has-banner" not in css      # real height, never assumed
+    assert "table.wide { min-width: 36rem; }" in css and "white-space: nowrap" in css and "position: sticky; left: 0" in css
+    assert ".mono" in css and "overflow-wrap: anywhere" in css.split(".mono")[1]
+    for p in ("limits.html", "method.html"):
+        assert 'class="card preamble"' in (SITE / p).read_text()
+    assert "text.js" in (SITE / "evidence.html").read_text()
+    assert "Swipe sideways to see all columns" in (SITE / "js" / "text.js").read_text()
+    ev = (SITE / "js" / "evidence.js").read_text()
+    assert '"n/a"' not in ev and "clamp" not in ev
 
 
 # e. size -----------------------------------------------------------------------------------------------------
@@ -221,5 +274,5 @@ def test_game_logic_node_tests():
     node = shutil.which("node")
     if not node:
         pytest.skip("node not installed")
-    r = subprocess.run([node, "--test", str(ROOT / "tests" / "node" / "game.test.js")], capture_output=True, text=True, cwd=ROOT)
+    r = subprocess.run([node, "--test", str(ROOT / "tests" / "node" / "game.test.js"), str(ROOT / "tests" / "node" / "svg.test.js")], capture_output=True, text=True, cwd=ROOT)
     assert r.returncode == 0, r.stdout[-2000:] + r.stderr[-1000:]

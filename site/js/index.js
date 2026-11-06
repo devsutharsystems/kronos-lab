@@ -23,10 +23,10 @@
   }
 
   // Power table from site.json
-  const rows = site.power.rows.map((r) => ({ cells: [fmt.int(r.n), fmt.ppRaw(r.min_detectable_edge_pp), fmt.pct(r.accuracy_needed)] }));
+  const rows = site.power.rows.map((r) => ({ cells: [fmt.int(r.n), fmt.ppRaw(r.min_detectable_edge_pp, 3), fmt.pct(r.accuracy_needed, 2)] }));
   document.getElementById("power-table").replaceChildren(
     table(["Analysis set N", "Smallest detectable edge", "Accuracy needed"], rows, [0, 1, 2]));
   document.getElementById("power-down").textContent =
     site.power.D ? "Kronos made " + fmt.int(site.power.D) + " down-calls. The smallest detectable shift in the share of correct down-calls is about " +
-      fmt.ppRaw(site.power.min_detectable_shift_down_calls_pp) + "." : "Kronos made no down-calls, so the comparison with always-up carries no information.";
+      fmt.ppRaw(site.power.min_detectable_shift_down_calls_pp, 3) + "." : "Kronos made no down-calls, so the comparison with always-up carries no information.";
 })();

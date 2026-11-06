@@ -57,19 +57,21 @@
     }
   }
 
-  function table(headers, rows, numericCols) {
+  function table(headers, rows, numericCols, opts) {
+    opts = opts || {};
     const num = new Set(numericCols || []);
-    const t = el("table");
+    const mono = new Set(opts.mono || []);
+    const t = el("table", { class: [opts.cls || "", opts.stickyFirst ? "sticky-first" : ""].join(" ").trim() });
     const thead = el("thead");
     const hr = el("tr");
-    headers.forEach((h, i) => hr.appendChild(el("th", { scope: "col", class: num.has(i) ? "num" : "", text: h })));
+    headers.forEach((h, i) => hr.appendChild(el("th", { scope: "col", class: (num.has(i) ? "num " : "") + (mono.has(i) ? "mono" : ""), text: h })));
     thead.appendChild(hr);
     t.appendChild(thead);
     const tb = el("tbody");
     rows.forEach((r) => {
       const tr = el("tr", r.cls ? { class: r.cls } : {});
       r.cells.forEach((c, i) => {
-        const td = el("td", num.has(i) ? { class: "num" } : {});
+        const td = el("td", { class: (num.has(i) ? "num " : "") + (mono.has(i) ? "mono" : "") });
         if (c instanceof Node) td.appendChild(c); else td.textContent = c;
         tr.appendChild(td);
       });
@@ -79,7 +81,10 @@
     return el("div", { class: "tablewrap" }, [t]);
   }
 
-  async function loadSite() {
+  let siteCache = null;
+  function loadSite() { return siteCache || (siteCache = loadSiteOnce()); }
+
+  async function loadSiteOnce() {
     try {
       const r = await fetch("data/site.json", { cache: "no-store" });
       if (!r.ok) throw new Error("HTTP " + r.status);
@@ -94,5 +99,5 @@
     }
   }
 
-  root.KL = { el, get, fmt, applyFmt, table, loadSite, bindAll };
+  root.KL = Object.assign(root.KL || {}, { el, get, fmt, applyFmt, table, loadSite, bindAll });
 })(window);

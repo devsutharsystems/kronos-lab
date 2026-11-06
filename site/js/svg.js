@@ -15,10 +15,31 @@
     return (v) => r0 + ((v - d0) / span) * (r1 - r0);
   }
 
-  function niceTicks(lo, hi, count) {
-    const out = [];
-    for (let i = 0; i <= count; i++) out.push(lo + ((hi - lo) * i) / count);
-    return out;
+  // Round ticks inside [lo, hi]: step is 1, 2 or 5 times a power of ten. decimals = digits needed to print the step.
+  function niceScale(lo, hi, count) {
+    const raw = (hi - lo) / count || 1;
+    const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+    const norm = raw / mag;
+    const step = (norm < 1.5 ? 1 : norm < 3 ? 2 : norm < 7 ? 5 : 10) * mag;
+    const decimals = Math.max(0, -Math.floor(Math.log10(step) + 1e-9));
+    const ticks = [];
+    for (let k = Math.ceil(lo / step - 1e-9); k * step <= hi + step * 1e-9; k++) ticks.push(Number((k * step).toFixed(decimals + 2)) + 0);
+    return { ticks, step, decimals };
+  }
+
+  function niceTicks(lo, hi, count) { return niceScale(lo, hi, count).ticks; }
+
+  // Axis range that contains every value in every array (plus extra values) with a fractional pad.
+  function dataRange(arrays, extra, padFrac) {
+    let lo = Infinity, hi = -Infinity;
+    arrays.concat([extra || []]).forEach((a) => a.forEach((v) => { if (v < lo) lo = v; if (v > hi) hi = v; }));
+    const pad = (hi - lo) * (padFrac == null ? 0.06 : padFrac) || 1;
+    return [lo - pad, hi + pad];
+  }
+
+  // Make sure `v` is among the ticks (kept sorted).
+  function withTick(ticks, v) {
+    return ticks.some((t) => Math.abs(t - v) < 1e-9) ? ticks : ticks.concat([v]).sort((p, q) => p - q);
   }
 
   function pathD(xs, ys) {
@@ -58,5 +79,7 @@
     return li;
   }
 
-  root.KLSVG = { s, scale, niceTicks, pathD, chart, axes, legendItem };
-})(window);
+  const api = { s, scale, niceScale, niceTicks, dataRange, withTick, pathD, chart, axes, legendItem };
+  root.KLSVG = api;
+  if (typeof module !== "undefined" && module.exports) module.exports = api;
+})(typeof window !== "undefined" ? window : globalThis);

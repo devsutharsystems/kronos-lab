@@ -11,6 +11,7 @@ Numbers are rounded to 4 significant digits. Total output must stay <= 2 MB.
 import argparse
 import json
 import re
+import subprocess
 import sys
 from datetime import timedelta
 from pathlib import Path
@@ -54,15 +55,52 @@ def day_str(d: int) -> str:
 
 
 # ---------------------------------------------------------------- text taken from PREREGISTRATION.md
+ISSUE_265_AS_OF = "5 Nov 2026"      # date stamp dictated by Dev (Phase 6, fix 8); shown as a separate note under the quoted line
+
+
+def split_row(line: str) -> list:
+    return [c.strip() for c in line.strip().strip("|").split("|")]
+
+
+def pipe_tables(text: str) -> list:
+    """All markdown pipe tables in `text`: [{"header": [...], "rows": [[...]], "line": first line index}]. Backticks removed."""
+    lines, out, i = text.splitlines(), [], 0
+    while i < len(lines):
+        if lines[i].lstrip().startswith("|"):
+            j = i
+            while j < len(lines) and lines[j].lstrip().startswith("|"):
+                j += 1
+            block = [split_row(x) for x in lines[i:j]]
+            if len(block) >= 2 and all(re.fullmatch(r":?-{3,}:?", c) for c in block[1]):
+                clean = lambda row: [c.replace("`", "").replace("**", "") for c in row]
+                out.append({"header": clean(block[0]), "rows": [clean(r) for r in block[2:]], "line": i,
+                            "mono": [k for k in range(len(block[0])) if block[2:] and all(r[k].startswith("`") and r[k].endswith("`") for r in block[2:])]})
+            i = j
+        else:
+            i += 1
+    return out
+
+
 def prereg_sections(text: str) -> dict:
-    """{section number: [ {text, level} ]} where level -1 = paragraph, 0 = bullet, 1 = sub-bullet. Tables dropped."""
+    """{section number: [ item ]}; item = {text, level} with level -1 paragraph, 0 bullet, 1 sub-bullet,
+    or {text:"", level:-2, table:{header, rows, mono}} for a pipe table."""
     out, cur = {}, None
-    for line in text.splitlines():
+    lines = text.splitlines()
+    tables = {t["line"]: t for t in pipe_tables(text)}
+    i = 0
+    while i < len(lines):
+        line = lines[i]
         m = re.match(r"^## (\d+)\.", line)
         if m:
-            cur = int(m.group(1)); out[cur] = []; continue
-        if cur is None or not line.strip() or line.lstrip().startswith("|"):
-            continue
+            cur = int(m.group(1)); out[cur] = []; i += 1; continue
+        if i in tables:
+            t = tables[i]
+            n_lines = 2 + len(t["rows"])
+            if cur is not None:
+                out[cur].append({"text": "", "level": -2, "table": {"header": t["header"], "rows": t["rows"], "mono": t["mono"]}})
+            i += n_lines; continue
+        if cur is None or not line.strip():
+            i += 1; continue
         b = re.match(r"^(\s*)- (.*)$", line)
         if b:
             level, body = (1 if len(b.group(1)) >= 2 else 0), b.group(2)
@@ -70,7 +108,33 @@ def prereg_sections(text: str) -> dict:
             level, body = -1, line.strip()
         body = body.replace("`", "").replace("**", "")
         out[cur].append({"text": body, "level": level})
+        i += 1
     return out
+
+
+def deviations(text: str) -> list:
+    """Entries of DEVIATIONS.md: [{date, title, text}] in file order."""
+    out, cur = [], None
+    for line in text.splitlines():
+        m = re.match(r"^## (.+)$", line)
+        if m:
+            head = m.group(1)
+            d = re.match(r"^(.+? [+-]\d{4}): (.*)$", head)
+            cur = {"date": d.group(1) if d else head, "title": d.group(2) if d else "", "text": ""}
+            out.append(cur); continue
+        if cur is not None and line.strip():
+            cur["text"] = (cur["text"] + " " + line.strip()).strip()
+    return out
+
+
+def prereg_commit_date() -> str:
+    """Date of the pre-registration commit named in site/js/config.js, e.g. '6 Nov 2026' (read from git, not typed)."""
+    cfg = (ROOT / "site" / "js" / "config.js").read_text()
+    h = re.search(r"/blob/([0-9a-f]{40})/PREREGISTRATION\.md", cfg).group(1)
+    r = subprocess.run(["git", "-C", str(ROOT), "log", "-1", "--format=%cd", "--date=format:%-d %b %Y", h], capture_output=True, text=True)
+    if r.returncode or not r.stdout.strip():
+        raise RuntimeError("cannot read the pre-registration commit date from git: " + r.stderr.strip())
+    return r.stdout.strip()
 
 
 # ---------------------------------------------------------------- site.json
@@ -115,7 +179,7 @@ def pick(rng_seed: int, pool: np.ndarray, k: int) -> np.ndarray:
     return np.random.default_rng(rng_seed).choice(pool, size=k, replace=False)
 
 
-def build_site_json(inp, res, synthetic: bool, prereg_text: str, meta: dict | None = None) -> dict:
+def build_site_json(inp, res, synthetic: bool, prereg_text: str, meta: dict | None = None, deviations_text: str | None = None) -> dict:
     assert inp.path is not None and inp.ctx_ohlc is not None, "inputs lack path / ctx_ohlc"
     d = A.derive(inp)
     d24 = d[HORIZON]
@@ -174,8 +238,16 @@ def build_site_json(inp, res, synthetic: bool, prereg_text: str, meta: dict | No
         "disclosures": [x["text"] for x in sections.get(2, [])],
         "limits": [x["text"] for x in sections.get(11, [])],
         "method": {str(n): sections.get(n, []) for n in (3, 4, 5, 6, 7, 8, 9, 10)},
+        "preamble": ("These statements were true when the pre-registration was committed (" + prereg_commit_date() +
+                     ", before the main run). They are quoted unchanged and describe the state before the run, not now."),
+        "deviations": deviations(deviations_text if deviations_text is not None else (ROOT / "DEVIATIONS.md").read_text()),
+        "limit_notes": [{"contains": "issue #265", "text": "Date stamp: the statement about issue #265 above is as of " + ISSUE_265_AS_OF + "."}],
     }
-    return r4(site)
+    assert any(n["contains"] in t for n in site["limit_notes"] for t in site["limits"]), "limit note matches no limit line"
+    power = json.loads(json.dumps(site["power"], default=lambda o: o.item() if hasattr(o, "item") else str(o)))
+    site = r4(site)
+    site["power"] = power         # unrounded: the page rounds once, at display
+    return site
 
 
 # ---------------------------------------------------------------- CLI
