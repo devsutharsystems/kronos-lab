@@ -11,3 +11,4 @@ drafts/
 .venv-kronos/
 data/processed/
 results/smoke/
+results/synthetic_demo/
