@@ -1,0 +1,10 @@
+.venv/
+.cache/
+data/raw/
+third_party/kronos/
+__pycache__/
+.DS_Store
+*.zip
+results/runs/
+notes/
+drafts/
