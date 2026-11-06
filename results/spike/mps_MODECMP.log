@@ -1,0 +1,3 @@
+mps available: True
+after from_pretrained: model.training=True tokenizer.training=True
+RESULT {"device": "mps", "cfg": "MODECMP", "torch": "2.15.0", "mps_available": true, "training_after_load": {"model": true, "tokenizer": true}, "mode_used": "eval", "error": "NotImplementedError: scaled_dot_product_attention for MPS does not support dropout."}

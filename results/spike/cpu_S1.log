@@ -1,0 +1,2 @@
+after from_pretrained: model.training=True tokenizer.training=True
+RESULT {"device": "cpu", "cfg": "S1", "torch": "2.15.0", "training_after_load": {"model": true, "tokenizer": true}, "mode_used": "eval", "sample_count": 1, "batch": 1, "kind": "single", "warmup_sec": 1.2237652089997937, "shape_ok": true, "nan_free": true, "timed_sec": [1.2263357500000893, 1.1651431250002133, 1.1689926250001008], "median_sec_per_call": 1.1689926250001008, "median_sec_per_origin": 1.1689926250001008, "maxrss_bytes_selfreported": 453443584}

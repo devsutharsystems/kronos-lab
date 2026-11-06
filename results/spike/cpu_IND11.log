@@ -1,0 +1,2 @@
+after from_pretrained: model.training=True tokenizer.training=True
+RESULT {"device": "cpu", "cfg": "IND11", "torch": "2.15.0", "training_after_load": {"model": true, "tokenizer": true}, "mode_used": "eval", "sample_count": 1, "batch": 1, "kind": "ind11", "warmup_sec": 2.037443166999765, "shape_ok": true, "nan_free": true, "timed_sec": [23.36172091599974, 19.70996120799964, 18.543195917000048], "median_sec_per_call": 19.70996120799964, "median_sec_per_origin": 19.70996120799964, "maxrss_bytes_selfreported": 431095808}

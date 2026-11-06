@@ -1,0 +1,3 @@
+mps available: True
+after from_pretrained: model.training=True tokenizer.training=True
+RESULT {"device": "mps", "cfg": "S5", "torch": "2.15.0", "mps_available": true, "training_after_load": {"model": true, "tokenizer": true}, "mode_used": "eval", "sample_count": 5, "batch": 1, "kind": "single", "warmup_sec": 6.038657542000237, "shape_ok": true, "nan_free": true, "timed_sec": [6.591842833000101, 6.625218832999963, 5.892652166000062], "median_sec_per_call": 6.591842833000101, "median_sec_per_origin": 6.591842833000101, "maxrss_bytes_selfreported": 553107456, "mps_driver_allocated_bytes": 1275772928}

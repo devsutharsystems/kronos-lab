@@ -1,0 +1,2 @@
+after from_pretrained: model.training=True tokenizer.training=True
+RESULT {"device": "cpu", "cfg": "DET", "torch": "2.15.0", "training_after_load": {"model": true, "tokenizer": true}, "mode_used": "eval", "shape_ok": true, "identical_same_seed": true, "max_abs_diff_same_seed": 0.0, "differs_other_seed": true, "sha256_seed777": "d94f8372ba772d52", "nan_free": true, "maxrss_bytes_selfreported": 516390912}

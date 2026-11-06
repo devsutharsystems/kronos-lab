@@ -1,0 +1,2 @@
+after from_pretrained: model.training=True tokenizer.training=True
+RESULT {"device": "cpu", "cfg": "MODECMP", "torch": "2.15.0", "training_after_load": {"model": true, "tokenizer": true}, "mode_used": "eval", "shapes_ok": true, "nan_free": true, "ref_mean_close": 10.93650390625, "mean_abs_diff_ohlc_eval_vs_train_same_seed": 0.023683318868279457, "mean_abs_diff_ohlc_eval_vs_eval_other_seed": 0.09037768840789795, "pct_of_mean_close_eval_vs_train": 0.21655292286545885, "pct_of_mean_close_eval_vs_eval_other_seed": 0.8263855541280323, "maxrss_bytes_selfreported": 432324608}

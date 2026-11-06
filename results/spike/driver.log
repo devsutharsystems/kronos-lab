@@ -1,0 +1,53 @@
+cpu S11 exit-ok maxrss=651116544 footprint=652575992
+after from_pretrained: model.training=True tokenizer.training=True
+cpu S21 exit-ok maxrss=832258048 footprint=931218872
+after from_pretrained: model.training=True tokenizer.training=True
+cpu IND11 exit-ok maxrss=431095808 footprint=334136280
+after from_pretrained: model.training=True tokenizer.training=True
+cpu B1S11 exit-ok maxrss=644759552 footprint=625083592
+after from_pretrained: model.training=True tokenizer.training=True
+cpu B4S11 exit-ok maxrss=1423278080 footprint=1543243648
+after from_pretrained: model.training=True tokenizer.training=True
+cpu B8S11 exit-ok maxrss=2045853696 footprint=2867645296
+after from_pretrained: model.training=True tokenizer.training=True
+cpu DET exit-ok maxrss=516816896 footprint=450839608
+after from_pretrained: model.training=True tokenizer.training=True
+cpu DET exit-ok maxrss=516390912 footprint=450937936
+after from_pretrained: model.training=True tokenizer.training=True
+mps S1 exit-ok maxrss=484638720 footprint=508314872
+mps available: True
+after from_pretrained: model.training=True tokenizer.training=True
+mps S5 exit-ok maxrss=553107456 footprint=1666893144
+mps available: True
+after from_pretrained: model.training=True tokenizer.training=True
+mps S11 exit-ok maxrss=529596416 footprint=1674888584
+mps available: True
+after from_pretrained: model.training=True tokenizer.training=True
+mps S21 exit-ok maxrss=478117888 footprint=1587250592
+mps available: True
+after from_pretrained: model.training=True tokenizer.training=True
+mps IND11 exit-ok maxrss=495828992 footprint=506103128
+mps available: True
+after from_pretrained: model.training=True tokenizer.training=True
+mps B1S11 exit-ok maxrss=520667136 footprint=1660601688
+mps available: True
+after from_pretrained: model.training=True tokenizer.training=True
+mps B4S11 exit-ok maxrss=508018688 footprint=2662614336
+mps available: True
+after from_pretrained: model.training=True tokenizer.training=True
+mps B8S11 exit-ok maxrss=522616832 footprint=4154836576
+mps available: True
+after from_pretrained: model.training=True tokenizer.training=True
+mps DET exit-ok maxrss=445235200 footprint=1675052352
+mps available: True
+after from_pretrained: model.training=True tokenizer.training=True
+mps DET exit-ok maxrss=474660864 footprint=1695729032
+mps available: True
+after from_pretrained: model.training=True tokenizer.training=True
+mps PARITY exit-ok maxrss=472449024 footprint=1684424096
+mps available: True
+after from_pretrained: model.training=True tokenizer.training=True
+mps MODECMP exit-ok maxrss=533987328 footprint=505054528
+mps available: True
+after from_pretrained: model.training=True tokenizer.training=True
+done
