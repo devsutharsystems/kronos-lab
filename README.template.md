@@ -1,0 +1,81 @@
+# Kronos Lab
+
+A pre-registered test of whether the direction accuracy of the Kronos-small forecasting model, on 1-hour crypto candles, differs from a coin flip (H1) and from always predicting "up" (H2). The plan, the hashes and the code were fixed before the main run. This file is generated from the result files by `scripts/build_readme.py`; nothing in it is typed by hand.
+
+## Result
+
+{{result_paragraph}}
+
+{{h2_note}}
+
+{{alwaysup_note}}
+
+Exploratory figures (per pair, per horizon and others) are on the site's Evidence page and in `results/final/results.json`. They are labelled exploratory and are not part of this summary.
+
+## Why the run stopped early
+
+{{stop_paragraph}}
+
+## Who is this for, and what can you do with it
+
+- **Curious readers** get a reality check on claims that AI models can predict prices: one model, one window, a result reported as it came out.
+- **Students** get a worked template for a pre-registered evaluation: a plan committed before the run, a decision rule, a deviations log, and an analysis run once.
+- **People who want to check the work** can verify the pre-registration commit, the file hashes and the code. The analysis can be rerun if the forecast file is obtained (its sha256 is in `DEVIATIONS.md`). Regenerating the forecasts needs Apple-silicon MPS and several hours, and bit-for-bit reproduction on other hardware is not claimed.
+
+What this does not show: it covers one time window, one model size, and crypto pairs only. Small effects are not excluded. It is not a trading tool.
+
+## The question, and what was fixed beforehand
+
+{{question_block}}
+
+The pre-registration was committed before the main run: [`PREREGISTRATION.md` at commit {{prereg_short}}]({{prereg_url}}). Changes after that point are in [`DEVIATIONS.md`](DEVIATIONS.md): [{{dev1_title}}]({{dev1_url}}) and [{{dev2_title}}]({{dev2_url}}).
+
+## How to reproduce
+
+The pieces that can be checked without the forecasts: the pre-registration commit, the expected hashes below, and the code. Commands, in order:
+
+```bash
+bash scripts/fetch_kronos.sh                                   # Kronos source at the pinned commit (online, once)
+python3.12 -m venv .venv-kronos && .venv-kronos/bin/pip install -r requirements-kronos.txt
+python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
+source scripts/env.sh && .venv-kronos/bin/python scripts/download_weights.py   # weights (online, once)
+.venv/bin/python -I scripts/download_data.py fetch             # Binance Vision files, checksum-verified
+.venv/bin/python -I scripts/download_data.py build             # processed CSVs and the data-quality report
+caffeinate -dimsu bash scripts/launch_run.sh                   # the main run: Apple-silicon MPS only, several hours
+.venv/bin/python scripts/analyze.py --root . --out results/final
+.venv/bin/python scripts/build_export.py
+.venv/bin/python scripts/build_site_data.py --root . --out site/data
+python3 scripts/serve_site.py --port {{port}}
+```
+
+The run needs MPS: the runner refuses to start without it, and MPS and CPU outputs differ. `analyze.py` refuses to run until `results/runs/DONE` exists, and it copies that file's contents into `results.json`, so a rerun with its own `DONE` file will differ from the committed `results.json` in that timestamp.
+
+Expected hashes (sha256):
+
+{{hash_table}}
+
+## Limits
+
+Quoted from `PREREGISTRATION.md`, section 11:
+
+{{limits_quote}}
+
+Added for this summary: one time window; one model size; crypto pairs only; cross-pair correlation means the exact tests treat origins as more independent than they are (the day-block interval is the check); {{samples}} samples per origin; and the weight-file dates are file dates, not the authors' training cutoff.
+
+## Repository layout
+
+- `PREREGISTRATION.md`, `DEVIATIONS.md`: the plan and the dated changes.
+- `kronos_lab/`: runner, adapter, data and analysis code. `scripts/`: download, run, analysis, export, README and site builders, and `serve_site.py` for local viewing.
+- `results/final/`: the analysis output, produced once. `results/export/`: a flat CSV copy of those figures with a data dictionary.
+- `results/data_quality.json`, `results/data_manifest.json`: data checks and file records.
+- `site/`: the static site (plain HTML, CSS and JavaScript, no external resources). `site/data/` holds the data it loads and the download files.
+- `tests/`: Python and node tests. `docs/`: decisions log, product notes, provenance records.
+- `third_party/`: the Kronos licence and the pin record; the Kronos source itself is fetched, not committed.
+
+## Licences
+
+- Code: MIT, see `LICENSE`. The Kronos code is MIT too; its notice is in `third_party/KRONOS_LICENSE`.
+- Data sample, `results/` (including `results/export/`) and `site/data/`: CC BY-NC-SA 4.0, see `DATA_LICENSE.md`.
+- Data: Binance Vision (data.binance.vision); not affiliated with or endorsed by Binance. This project is not affiliated with the Kronos authors.
+
+Not financial advice.

@@ -17,6 +17,8 @@ os.environ.setdefault("HF_HUB_CACHE", str(ROOT / ".cache" / "huggingface" / "hub
 os.environ.setdefault("HF_HUB_OFFLINE", "1")
 
 torch = pytest.importorskip("torch")
+if not (ROOT / "third_party" / "kronos" / "model").exists():      # the Kronos source is fetched by scripts/fetch_kronos.sh, not committed
+    pytest.skip("third_party/kronos source not present (run scripts/fetch_kronos.sh)", allow_module_level=True)
 sys.path.insert(0, str(ROOT / "third_party" / "kronos"))
 CSV = ROOT / "third_party" / "kronos" / "tests" / "data" / "regression_input.csv"
 TOK = ("NeoQuasar/Kronos-Tokenizer-base", "0e0117387f39004a9016484a186a908917e22426")
