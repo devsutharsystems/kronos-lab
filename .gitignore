@@ -12,4 +12,5 @@ drafts/
 data/processed/
 results/smoke/
 results/synthetic_demo/
-site/data/
+site/data/*
+!site/data/site.json

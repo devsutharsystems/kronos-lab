@@ -22,6 +22,17 @@
     notRuledOut.hidden = false;
   }
 
+  // Notes derived from site.json (see notes.js); each is shown only when its condition holds in the data.
+  const show = (id, text) => { const n = document.getElementById(id); if (text) { n.textContent = text; n.hidden = false; } return n; };
+  show("note-holm", KLNotes.holmNote(site));
+  show("note-alwaysup", KLNotes.alwaysUpNote(site));
+  const setText = KLNotes.analysisSetNote(site);
+  if (setText) {
+    const n = show("analysis-set", setText);
+    n.appendChild(el("a", { href: "method.html#recorded-deviations", text: "Recorded deviations on the Method page" }));
+    n.appendChild(document.createTextNode("."));
+  }
+
   // Power table from site.json
   const rows = site.power.rows.map((r) => ({ cells: [fmt.int(r.n), fmt.ppRaw(r.min_detectable_edge_pp, 3), fmt.pct(r.accuracy_needed, 2)] }));
   document.getElementById("power-table").replaceChildren(

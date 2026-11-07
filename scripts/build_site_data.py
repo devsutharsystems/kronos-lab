@@ -138,23 +138,18 @@ def prereg_commit_date() -> str:
 
 
 # ---------------------------------------------------------------- site.json
-def results_table(inp, derived) -> list:
-    rows = []
-    pairs = [p for p in A.PAIRS_DEFAULT if p in set(inp.pair.tolist())] or sorted(set(inp.pair.tolist()))
-    for pair in pairs + ["ALL"]:
-        sel = np.ones(len(inp), bool) if pair == "ALL" else (inp.pair == pair)
-        for j, h in enumerate(A.HORIZONS):
-            d = derived[h]
-            m = d["use"] & sel
-            n = int(m.sum())
-            acc = float((d["label"][m] == d["signal"][m]).mean()) if n else None
-            with np.errstate(invalid="ignore"):
-                psig = np.sign(inp.last_close - inp.ctx_tail[:, -1 - h])
-            pm = d["valid"] & (d["label"] != 0) & (psig != 0) & sel
-            pacc = float((d["label"][pm] == psig[pm]).mean()) if pm.any() else None
-            rows.append({"pair": pair, "horizon": h, "n": n, "kronos_accuracy": acc, "persistence_accuracy": pacc,
-                         "primary": bool(pair == "ALL" and h == HORIZON)})
-    return rows
+def results_table(res) -> dict:
+    """Evidence tables, copied from results.json only (primary block + exploratory blocks). No new statistics."""
+    prim = res["primary"]
+    by_h, pers, by_pair = res["exploratory_accuracy_by_horizon"], res["exploratory_persistence_baseline"], res["exploratory_by_pair"]
+    all_rows = []
+    for h in A.HORIZONS:
+        src = prim if h == HORIZON else by_h[f"h{h}"]
+        all_rows.append({"horizon": h, "n": src["n"], "k_correct": src["k_correct"], "kronos_accuracy": src["accuracy"],
+                         "persistence_n": pers[f"h{h}"]["n"], "persistence_accuracy": pers[f"h{h}"]["accuracy"], "primary": h == HORIZON})
+    pair_rows = [{"pair": q, "n": by_pair[q]["n"], "k_correct": by_pair[q]["k_correct"], "kronos_accuracy": by_pair[q]["accuracy"]}
+                 for q in A.PAIRS_DEFAULT if q in by_pair]
+    return {"all_pairs": all_rows, "by_pair_h24": pair_rows, "note": "all rows except the all-pairs row at the primary horizon are exploratory"}
 
 
 def running_score(inp, derived, res) -> dict:
@@ -222,11 +217,11 @@ def build_site_json(inp, res, synthetic: bool, prereg_text: str, meta: dict | No
         "primary": {k: prim[k] for k in ("n", "n_days", "k_correct", "accuracy", "ci_accuracy", "always_up_accuracy", "accuracy_diff",
                                          "ci_diff", "p_h1_raw", "p_h2_raw", "p_h1_holm", "p_h2_holm",
                                          "discordant_kronos_right_alwaysup_wrong", "discordant_kronos_wrong_alwaysup_right",
-                                         "kronos_down_calls_D", "share_correct_down_calls") if k in prim},
+                                         "kronos_down_calls_D", "share_correct_down_calls", "exclusions_h24") if k in prim},
         "power": {"rows": res["power"]["rows"], "k": res["power"]["k"], "z_sum": res["power"]["z_sum"], "D": res["power"]["D"],
                   "min_detectable_shift_down_calls_pp": res["power"]["min_detectable_shift_down_calls_pp"]},
-        "results_table": results_table(inp, d),
-        "running_score": running_score(inp, d, res),
+        "results_table": results_table(res),
+        "running_score": running_score(inp, d, res) if synthetic else None,   # real mode: the running Kronos line is not in results.json, so it is not shown
         "featured": featured,
         "game": game,
         "selection": {
@@ -244,9 +239,10 @@ def build_site_json(inp, res, synthetic: bool, prereg_text: str, meta: dict | No
         "limit_notes": [{"contains": "issue #265", "text": "Date stamp: the statement about issue #265 above is as of " + ISSUE_265_AS_OF + "."}],
     }
     assert any(n["contains"] in t for n in site["limit_notes"] for t in site["limits"]), "limit note matches no limit line"
-    power = json.loads(json.dumps(site["power"], default=lambda o: o.item() if hasattr(o, "item") else str(o)))
+    exact = {k: json.loads(json.dumps(site[k], default=lambda o: o.item() if hasattr(o, "item") else str(o)))
+             for k in ("primary", "headline", "power", "results_table")}
     site = r4(site)
-    site["power"] = power         # unrounded: the page rounds once, at display
+    site.update(exact)            # copied from results unrounded: the page rounds once, at display
     return site
 
 
@@ -281,7 +277,7 @@ def main(argv=None) -> int:
     (out / "site.json").write_text(text)
     label = "SYNTHETIC" if a.synthetic else "REAL"
     print(f"{label}: wrote {out / 'site.json'} ({len(text.encode())} bytes); featured={len(site['featured'])} game={len(site['game'])} "
-          f"points={len(site['running_score']['n'])}")
+          f"points={len(site['running_score']['n']) if site['running_score'] else 'none (real mode)'}")
     return 0
 
 

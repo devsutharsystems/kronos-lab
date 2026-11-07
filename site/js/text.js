@@ -1,7 +1,8 @@
 // Method and Limits pages: text is rendered from site.json (quoted from PREREGISTRATION.md at build time),
 // so no figures are typed into the HTML.
 window.KL = window.KL || {};
-KL.hints = { swipe: "Swipe sideways to see all columns" };
+KL.hints = { swipe: "Swipe sideways to see all columns",
+  results: "Only pre-registered and already-computed figures are shown. All rows except the all-pairs row at the primary horizon are exploratory." };
 
 (async function () {
   "use strict";
@@ -45,7 +46,7 @@ KL.hints = { swipe: "Swipe sideways to see all columns" };
       m.appendChild(el("h2", { text: TITLES[k] || "Section" }));
       m.appendChild(renderItems(site.method[k]));
       if (k === DEVIATIONS_AFTER) {
-        m.appendChild(el("h2", { text: "Recorded deviations" }));
+        m.appendChild(el("h2", { id: "recorded-deviations", text: "Recorded deviations" }));
         if (!site.deviations.length) m.appendChild(el("p", { text: "No deviations are recorded." }));
         site.deviations.forEach((d) => {
           m.appendChild(el("h3", { text: d.date + (d.title ? ": " + d.title : "") }));

@@ -72,13 +72,14 @@ def test_site_json_matches_schema(site):
         assert len(g["context"]) == 72 and all(len(b) == 4 and all(is_num(v) for v in b) for b in g["context"])
         assert len(g["actual"]) == 24 and g["kronos_call"] in (-1, 1) and g["coin_flip"] in (-1, 1)
         assert set(g["reveal"]) == {"pair", "date"}
-    rs = site["running_score"]
+    rs = site["running_score"]                        # SYNTHETIC build only; real mode has none (see test_real_mode_shape)
     n = len(rs["n"])
     assert 0 < n <= 300 and all(len(rs[k]) == n for k in ("kronos", "band_lo", "band_median", "band_hi"))
     assert all(lo <= m <= hi for lo, m, hi in zip(rs["band_lo"], rs["band_median"], rs["band_hi"]))
-    rows = site["results_table"]
-    assert sum(r["primary"] for r in rows) == 1 and len(rows) == 7 * 3
-    assert [r for r in rows if r["primary"]][0]["pair"] == "ALL" and [r for r in rows if r["primary"]][0]["horizon"] == 24
+    rt = site["results_table"]
+    assert [r["horizon"] for r in rt["all_pairs"]] == [1, 4, 24] and sum(r["primary"] for r in rt["all_pairs"]) == 1
+    assert [r for r in rt["all_pairs"] if r["primary"]][0]["horizon"] == 24
+    assert [r["pair"] for r in rt["by_pair_h24"]] == p["pairs"]
     assert set(site["method"]) == {str(k) for k in range(3, 11)} and all(site["method"][k] for k in site["method"])
     assert site["limits"] and all(isinstance(x, str) for x in site["limits"]) and site["disclosures"]
     assert site["selection"]["featured"]["seed"] == 20261108 and site["selection"]["game"]["seed"] == 20261109
@@ -157,11 +158,73 @@ def test_synthetic_banner_hook_on_every_page_and_title_prefix_in_code():
 def test_tracked_site_json_must_not_be_synthetic():
     tracked = subprocess.run(["git", "-C", str(ROOT), "ls-files", "site/data/site.json"], capture_output=True, text=True).stdout.strip()
     if tracked:
-        assert json.loads((ROOT / "site" / "data" / "site.json").read_text())["synthetic"] is False
+        raw = (ROOT / "site" / "data" / "site.json").read_bytes()
+        assert json.loads(raw)["synthetic"] is False and len(raw) <= 2 * 1024 * 1024
 
 
-def test_site_data_is_gitignored():
-    assert "site/data/" in (ROOT / ".gitignore").read_text().split()
+def test_only_site_json_is_trackable_under_site_data():
+    tokens = (ROOT / ".gitignore").read_text().split()
+    assert "site/data/*" in tokens and "!site/data/site.json" in tokens
+    assert "results/synthetic_demo/" in tokens
+    ls = subprocess.run(["git", "-C", str(ROOT), "ls-files", "site/data"], capture_output=True, text=True).stdout.split()
+    assert set(ls) <= {"site/data/site.json"}
+
+
+def test_tracked_site_files_contain_no_local_paths():
+    files = subprocess.run(["git", "-C", str(ROOT), "ls-files", "site"], capture_output=True, text=True).stdout.split()
+    assert files
+    for f in files:
+        t = (ROOT / f).read_text(errors="replace")
+        for bad in ("/Users/", "/private/", "/var/folders", "/home/", "C:\\Users"):
+            assert bad not in t, f"{f} contains {bad}"
+
+
+def test_real_mode_shape_has_no_running_score_and_is_exact(builder):
+    # SYNTHETIC inputs built with synthetic=False only to exercise the real-mode branch in memory
+    inp = A.synthetic_inputs(seed=1, skill=0.1, rho=0.5, n_days=80)
+    res = json.loads(json.dumps(A.clean(A.run_analysis(inp, B=300))))
+    s = builder.build_site_json(inp, res, False, (ROOT / "PREREGISTRATION.md").read_text(), None)
+    assert s["synthetic"] is False and s["running_score"] is None and s["synthetic_meta"] is None
+    for k in ("n", "k_correct", "n_days", "accuracy", "ci_accuracy", "always_up_accuracy", "accuracy_diff", "ci_diff", "p_h1_raw", "p_h2_raw",
+              "p_h1_holm", "p_h2_holm", "kronos_down_calls_D", "exclusions_h24"):
+        assert s["primary"][k] == res["primary"][k], k                       # exact, not rounded
+    assert s["power"]["rows"] == res["power"]["rows"]
+
+
+def test_real_site_json_equals_results_json_exactly():
+    # reads only two committed files: results/final/results.json and site/data/site.json
+    res = json.loads((ROOT / "results" / "final" / "results.json").read_text())
+    site = json.loads((ROOT / "site" / "data" / "site.json").read_text())
+    assert site["synthetic"] is False and res["data_source"] == "REAL"
+    P, sp = res["primary"], site["primary"]
+    for k in ("n", "k_correct", "n_days", "accuracy", "ci_accuracy", "always_up_accuracy", "accuracy_diff", "ci_diff", "p_h1_raw", "p_h2_raw",
+              "p_h1_holm", "p_h2_holm", "kronos_down_calls_D", "discordant_kronos_right_alwaysup_wrong", "discordant_kronos_wrong_alwaysup_right",
+              "exclusions_h24"):
+        assert sp[k] == P[k], k
+    assert sp["exclusions_h24"] == res["exclusions"]["h24"] == P["exclusions_h24"]
+    h = site["headline"]
+    assert h["decision_h1"] == P["decision_h1"] and h["decision_h2"] == P["decision_h2"] and h["headline"] == P["headline"]
+    assert h["underpowered"] == P["underpowered"] and h["n"] == P["n"] and h["D"] == P["kronos_down_calls_D"]
+    assert h["largest_edge_not_ruled_out_h1"] == P["largest_edge_not_ruled_out_h1"]
+    assert h["largest_gain_vs_always_up_not_ruled_out_h2"] == P["largest_gain_vs_always_up_not_ruled_out_h2"]
+    assert site["power"]["rows"] == res["power"]["rows"] and site["power"]["D"] == res["power"]["D"]
+    assert site["power"]["min_detectable_shift_down_calls_pp"] == res["power"]["min_detectable_shift_down_calls_pp"]
+    assert site["running_score"] is None
+    rt = {r["horizon"]: r for r in site["results_table"]["all_pairs"]}
+    assert rt[24]["kronos_accuracy"] == P["accuracy"]
+    for hz in (1, 4):
+        assert rt[hz]["kronos_accuracy"] == res["exploratory_accuracy_by_horizon"][f"h{hz}"]["accuracy"]
+    for hz in (1, 4, 24):
+        assert rt[hz]["persistence_accuracy"] == res["exploratory_persistence_baseline"][f"h{hz}"]["accuracy"]
+    for r in site["results_table"]["by_pair_h24"]:
+        assert r["kronos_accuracy"] == res["exploratory_by_pair"][r["pair"]]["accuracy"] and r["n"] == res["exploratory_by_pair"][r["pair"]]["n"]
+
+
+def test_real_deviation_entry_and_limits_text_are_in_site_json():
+    site = json.loads((ROOT / "site" / "data" / "site.json").read_text())
+    assert any("run closed after the cutoff" in d["title"] and d["date"].startswith("2026-11-07") for d in site["deviations"])
+    assert site["preamble"].startswith("These statements were true when the pre-registration was committed (")
+    assert site["limit_notes"][0]["text"].endswith("as of 5 Nov 2026.")
 
 
 # d. game windows --------------------------------------------------------------------------------------------
@@ -257,7 +320,8 @@ def test_phase6_layout_rules_in_css_and_pages():
     assert ".mono" in css and "overflow-wrap: anywhere" in css.split(".mono")[1]
     for p in ("limits.html", "method.html"):
         assert 'class="card preamble"' in (SITE / p).read_text()
-    assert "text.js" in (SITE / "evidence.html").read_text()
+    assert "text.js" in (SITE / "evidence.html").read_text() and "notes.js" in (SITE / "index.html").read_text()
+    assert 'id: "recorded-deviations"' in (SITE / "js" / "text.js").read_text()
     assert "Swipe sideways to see all columns" in (SITE / "js" / "text.js").read_text()
     ev = (SITE / "js" / "evidence.js").read_text()
     assert '"n/a"' not in ev and "clamp" not in ev
@@ -274,5 +338,5 @@ def test_game_logic_node_tests():
     node = shutil.which("node")
     if not node:
         pytest.skip("node not installed")
-    r = subprocess.run([node, "--test", str(ROOT / "tests" / "node" / "game.test.js"), str(ROOT / "tests" / "node" / "svg.test.js")], capture_output=True, text=True, cwd=ROOT)
+    r = subprocess.run([node, "--test", str(ROOT / "tests" / "node" / "game.test.js"), str(ROOT / "tests" / "node" / "svg.test.js"), str(ROOT / "tests" / "node" / "notes.test.js")], capture_output=True, text=True, cwd=ROOT)
     assert r.returncode == 0, r.stdout[-2000:] + r.stderr[-1000:]

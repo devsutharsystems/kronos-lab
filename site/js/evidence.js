@@ -41,7 +41,8 @@
 
   // ---------------- running score vs coin-flip band
   const rs = site.running_score;
-  if (rs.n.length) {
+  if (!rs) document.getElementById("h-run").parentElement.hidden = true;   // real mode: this line is not in results.json
+  else if (rs.n.length) {
     const W = 640, H = 340, l = 66, r = 16, t = 14, b = 270;
     const REF = 0.5;                                  // chance level for a two-way call
     const [lo, hi] = S.dataRange([rs.kronos, rs.band_lo, rs.band_hi, rs.band_median], [REF], 0.06);
@@ -66,15 +67,18 @@
     document.getElementById("running-note").textContent = rs.band + ". The band is an illustration; the inference is on the front page.";
   }
 
-  // ---------------- results table (persistence is exploratory in every row)
-  const NOT_PREREG = "not pre-registered at h = " + site.protocol.primary_horizon;
-  const rows = site.results_table.map((r) => {
-    const tag = el("span", { class: r.primary ? "badge primary" : "badge", text: r.primary ? "primary" : "exploratory" });
-    const pers = r.persistence_accuracy == null ? NOT_PREREG : fmt.pct(r.persistence_accuracy);
-    return { cls: r.primary ? "primary-row" : "", cells: [r.pair === "ALL" ? "all pairs" : r.pair, "h = " + r.horizon, fmt.int(r.n),
-      fmt.pct(r.kronos_accuracy), pers, tag] };
-  });
+  // ---------------- results tables (copied from results.json; everything but the primary row is exploratory)
+  const badge = (primary) => el("span", { class: primary ? "badge primary" : "badge", text: primary ? "primary" : "exploratory" });
+  const rt = site.results_table;
+  const allRows = rt.all_pairs.map((r) => ({ cls: r.primary ? "primary-row" : "", cells: ["h = " + r.horizon, fmt.int(r.n), fmt.pct(r.kronos_accuracy),
+    fmt.pct(r.persistence_accuracy), badge(r.primary)] }));
+  const pairRows = rt.by_pair_h24.map((r) => ({ cells: [r.pair, fmt.int(r.n), fmt.pct(r.kronos_accuracy), badge(false)] }));
   const resultsEl = document.getElementById("results");
-  resultsEl.replaceChildren(el("p", { class: "small", text: KL.hints.swipe }),
-    table(["Pair", "Horizon (bars)", "N", "Kronos accuracy", "Persistence accuracy (exploratory)", "Status"], rows, [2, 3, 4], { cls: "wide", stickyFirst: true }));
+  const intro = [el("p", { class: "small", text: KL.hints.swipe })];
+  if (!site.synthetic) intro.unshift(el("p", { text: KL.hints.results }));
+  resultsEl.replaceChildren(...intro,
+    el("h3", { text: "All pairs, by horizon" }),
+    table(["Horizon (bars)", "N", "Kronos accuracy", "Persistence accuracy (exploratory)", "Status"], allRows, [1, 2, 3], { cls: "wide", stickyFirst: true }),
+    el("h3", { text: "By pair, at the primary horizon" }),
+    table(["Pair", "N", "Kronos accuracy", "Status"], pairRows, [1, 2], { cls: "wide", stickyFirst: true }));
 })();
