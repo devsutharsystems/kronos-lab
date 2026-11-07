@@ -40,6 +40,7 @@ def leaves(o):
 HEX = re.compile(r"\b(?=[0-9a-f]*\d)(?=[0-9a-f]*[a-f])[0-9a-f]{8,64}\b")
 URL = re.compile(r"https?://[^\s)>\]]+")
 STAMP = re.compile(r"\d{4}-\d{2}-\d{2}(?:T[0-9:]+Z?)?|\b\d{2}:\d{2}(?::\d{2})?\b")
+SCI = re.compile(r"\b\d+e-\d+\b")          # e.g. a stated tolerance; must appear in tests/test_analysis.py
 NUM = re.compile(r"(?<![A-Za-z0-9_.])[+-]?(\d+(?:\.\d+)?)(?![A-Za-z0-9_])")
 
 
@@ -70,6 +71,11 @@ def untraced(text: str) -> list:
             bad.append(h)
     rest = HEX.sub(" ", text)
     rest = URL.sub(" ", rest)
+    tol_src = (ROOT / "tests" / "test_analysis.py").read_text()
+    for sc in SCI.findall(rest):
+        if sc not in tol_src:
+            bad.append(sc)
+    rest = SCI.sub(" ", rest)
     for st in STAMP.findall(rest):
         if st not in joined:
             bad.append(st)

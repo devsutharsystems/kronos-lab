@@ -18,7 +18,7 @@ Public metadata fetched from the Hugging Face API for the Kronos-small and Krono
 
 ## Spike measurements: `results/spike/` and `docs/spike_report.md`
 
-Measurements from the Phase 1 timing spike: timings, memory figures, array shapes, pass/fail flags, output hashes, and a few aggregate figures (for example the mean absolute difference between two forecasts and the mean close of the input window). The input was the example CSV (5-minute stock bars) shipped in the Kronos repository, which is MIT licensed (`third_party/KRONOS_LICENSE`). These files contain no Binance data and store no price series or forecast series. They are released under the MIT license in `LICENSE`.
+Measurements from the Phase 1 timing spike: timings, memory figures, array shapes, pass/fail flags, output hashes, and a few aggregate figures (for example the mean absolute difference between two forecasts and the mean close of the input window). The input was the example CSV in the Kronos repository, which is MIT licensed (`third_party/KRONOS_LICENSE`); no claim is made about that data's upstream origin. These files contain no Binance data and store no price series or forecast series. They are released under the MIT license in `LICENSE`.
 
 ## Other
 
