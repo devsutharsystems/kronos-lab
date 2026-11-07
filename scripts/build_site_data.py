@@ -10,6 +10,7 @@ Numbers are rounded to 4 significant digits. Total output must stay <= 2 MB.
 """
 import argparse
 import json
+import shutil
 import re
 import subprocess
 import sys
@@ -127,6 +128,14 @@ def deviations(text: str) -> list:
     return out
 
 
+def ci_level(prereg_text: str) -> int:
+    """Interval level in per cent, read from the pre-registration wording ("Percentile 95% confidence intervals")."""
+    m = re.search(r"Percentile (\d+)% confidence", prereg_text)
+    if not m:
+        raise RuntimeError("cannot find the confidence level in PREREGISTRATION.md")
+    return int(m.group(1))
+
+
 def prereg_commit_date() -> str:
     """Date of the pre-registration commit named in site/js/config.js, e.g. '6 Nov 2026' (read from git, not typed)."""
     cfg = (ROOT / "site" / "js" / "config.js").read_text()
@@ -209,7 +218,7 @@ def build_site_json(inp, res, synthetic: bool, prereg_text: str, meta: dict | No
                      "pred_len": A.PRED_LEN, "window_start": A.WINDOW_START.isoformat(), "window_end": day_str(A.N_DAYS - 1),
                      "days": A.N_DAYS, "pairs": list(A.PAIRS_DEFAULT), "origins_total": A.N_DAYS * len(A.PAIRS_DEFAULT),
                      "context_bars_shown": A.CTX_BARS_SHOWN, "underpowered_below_n": A.UNDERPOWERED_N, "alpha": A.ALPHA,
-                     "bootstrap_B": A.B_BOOT, "game_windows": len(game), "featured_origins": len(featured)},
+                     "bootstrap_B": A.B_BOOT, "ci_level": ci_level(prereg_text), "game_windows": len(game), "featured_origins": len(featured)},
         "headline": {"decision_h1": prim["decision_h1"], "decision_h2": prim["decision_h2"], "headline": prim["headline"],
                      "underpowered": prim["underpowered"], "n": prim["n"], "D": prim["kronos_down_calls_D"],
                      "largest_edge_not_ruled_out_h1": prim["largest_edge_not_ruled_out_h1"],
@@ -217,9 +226,10 @@ def build_site_json(inp, res, synthetic: bool, prereg_text: str, meta: dict | No
         "primary": {k: prim[k] for k in ("n", "n_days", "k_correct", "accuracy", "ci_accuracy", "always_up_accuracy", "accuracy_diff",
                                          "ci_diff", "p_h1_raw", "p_h2_raw", "p_h1_holm", "p_h2_holm",
                                          "discordant_kronos_right_alwaysup_wrong", "discordant_kronos_wrong_alwaysup_right",
-                                         "kronos_down_calls_D", "share_correct_down_calls", "exclusions_h24") if k in prim},
+                                         "kronos_down_calls_D", "share_correct_down_calls", "exclusions_h24", "naive_binomial_ci95") if k in prim},
         "power": {"rows": res["power"]["rows"], "k": res["power"]["k"], "z_sum": res["power"]["z_sum"], "D": res["power"]["D"],
                   "min_detectable_shift_down_calls_pp": res["power"]["min_detectable_shift_down_calls_pp"]},
+        "power_at_actual_n": res["power_at_actual_N"],
         "results_table": results_table(res),
         "running_score": running_score(inp, d, res) if synthetic else None,   # real mode: the running Kronos line is not in results.json, so it is not shown
         "featured": featured,
@@ -240,7 +250,7 @@ def build_site_json(inp, res, synthetic: bool, prereg_text: str, meta: dict | No
     }
     assert any(n["contains"] in t for n in site["limit_notes"] for t in site["limits"]), "limit note matches no limit line"
     exact = {k: json.loads(json.dumps(site[k], default=lambda o: o.item() if hasattr(o, "item") else str(o)))
-             for k in ("primary", "headline", "power", "results_table")}
+             for k in ("primary", "headline", "power", "power_at_actual_n", "results_table")}
     site = r4(site)
     site.update(exact)            # copied from results unrounded: the page rounds once, at display
     return site
@@ -275,6 +285,9 @@ def main(argv=None) -> int:
     text = json.dumps(site, separators=(",", ":"), allow_nan=False)
     assert len(text.encode()) <= MAX_BYTES, f"site.json is {len(text)} bytes"
     (out / "site.json").write_text(text)
+    if not a.synthetic:                                         # downloads: byte-identical copies of the committed exports
+        for src in ("results/export/results_summary.csv", "results/export/data_dictionary.csv", "results/final/results.json"):
+            shutil.copyfile(Path(a.root) / src, out / Path(src).name)
     label = "SYNTHETIC" if a.synthetic else "REAL"
     print(f"{label}: wrote {out / 'site.json'} ({len(text.encode())} bytes); featured={len(site['featured'])} game={len(site['game'])} "
           f"points={len(site['running_score']['n']) if site['running_score'] else 'none (real mode)'}")

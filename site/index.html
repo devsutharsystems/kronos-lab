@@ -8,7 +8,10 @@
   <link rel="stylesheet" href="style.css">
   <script src="js/config.js" defer></script>
   <script src="js/common.js" defer></script>
+  <script src="js/svg.js" defer></script>
+  <script src="js/plot.js" defer></script>
   <script src="js/notes.js" defer></script>
+  <script src="js/text.js" defer></script>
   <script src="js/index.js" defer></script>
 </head>
 <body>
@@ -35,6 +38,16 @@
         <p class="small" id="analysis-set" hidden></p>
         <p class="small" id="note-holm" hidden></p>
       </div>
+      <div class="hero">
+        <div id="verdicts" class="verdicts"></div>
+        <figure class="plotcard">
+          <figcaption id="plot-title" class="plot-caption"></figcaption>
+          <div id="interval-plot"></div>
+          <p class="small" id="plot-note"></p>
+          <p class="small" id="interval-alt"></p>
+        </figure>
+      </div>
+      <div id="statcards" class="statcards"></div>
       <dl class="stats">
         <dt>Origins scored (analysis set)</dt><dd data-bind="headline.n" data-fmt="int"></dd>
         <dt>Primary horizon (bars ahead)</dt><dd data-bind="protocol.primary_horizon"></dd>

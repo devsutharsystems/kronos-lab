@@ -1,6 +1,6 @@
 # Data License
 
-`data/sample/`, `results/` and `site/data/` are derived from Binance Vision datasets and are licensed under CC BY-NC-SA 4.0 (https://creativecommons.org/licenses/by-nc-sa/4.0/).
+`data/sample/`, `results/` (including the CSV export in `results/export/`) and `site/data/` (including its copies of the export files) are derived from Binance Vision datasets and are licensed under CC BY-NC-SA 4.0 (https://creativecommons.org/licenses/by-nc-sa/4.0/).
 
 Attribution: Data: Binance Vision (data.binance.vision)
 

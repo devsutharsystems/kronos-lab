@@ -68,17 +68,28 @@
   }
 
   // ---------------- results tables (copied from results.json; everything but the primary row is exploratory)
-  const badge = (primary) => el("span", { class: primary ? "badge primary" : "badge", text: primary ? "primary" : "exploratory" });
+  const T = KL.text, E = T.evidence;
+  const badge = (primary) => el("span", { class: primary ? "badge primary" : "badge", text: primary ? T.badgePrimary : T.badgeExploratory });
   const rt = site.results_table;
-  const allRows = rt.all_pairs.map((r) => ({ cls: r.primary ? "primary-row" : "", cells: ["h = " + r.horizon, fmt.int(r.n), fmt.pct(r.kronos_accuracy),
+  const allRows = rt.all_pairs.map((r) => ({ cls: r.primary ? "primary-row" : "", cells: [E.horizonPrefix + r.horizon, fmt.int(r.n), fmt.pct(r.kronos_accuracy),
     fmt.pct(r.persistence_accuracy), badge(r.primary)] }));
   const pairRows = rt.by_pair_h24.map((r) => ({ cells: [r.pair, fmt.int(r.n), fmt.pct(r.kronos_accuracy), badge(false)] }));
   const resultsEl = document.getElementById("results");
-  const intro = [el("p", { class: "small", text: KL.hints.swipe })];
-  if (!site.synthetic) intro.unshift(el("p", { text: KL.hints.results }));
+  const intro = [el("p", { class: "small", text: T.swipe })];
+  if (!site.synthetic) intro.unshift(el("p", { text: T.results }));
   resultsEl.replaceChildren(...intro,
-    el("h3", { text: "All pairs, by horizon" }),
-    table(["Horizon (bars)", "N", "Kronos accuracy", "Persistence accuracy (exploratory)", "Status"], allRows, [1, 2, 3], { cls: "wide", stickyFirst: true }),
-    el("h3", { text: "By pair, at the primary horizon" }),
-    table(["Pair", "N", "Kronos accuracy", "Status"], pairRows, [1, 2], { cls: "wide", stickyFirst: true }));
+    el("h3", { text: E.allPairs }),
+    table([E.cols.horizon, E.cols.n, E.cols.acc, E.cols.pers, E.cols.status], allRows, [1, 2, 3], { cls: "wide", stickyFirst: true }),
+    el("h3", { text: E.byPair }),
+    table([E.cols.pair, E.cols.n, E.cols.acc, E.cols.status], pairRows, [1, 2], { cls: "wide", stickyFirst: true }));
+
+  // ---------------- downloads (real mode only: the files are copies of the committed exports)
+  const dl = document.getElementById("downloads");
+  if (!site.synthetic) {
+    dl.replaceChildren(
+      el("a", { class: "btn", href: "data/results_summary.csv", download: "", text: T.downloads.csv }),
+      el("a", { class: "btn", href: "data/results.json", download: "", text: T.downloads.json }),
+      el("a", { class: "btn", href: "data/data_dictionary.csv", download: "", text: T.downloads.dictionary }));
+    dl.hidden = false;
+  }
 })();

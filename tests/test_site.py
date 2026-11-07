@@ -47,7 +47,7 @@ def is_num(x):
 
 def test_site_json_matches_schema(site):
     assert set(site) == {"synthetic", "synthetic_meta", "protocol", "headline", "primary", "power", "results_table", "running_score",
-                         "featured", "game", "selection", "disclosures", "limits", "method", "preamble", "deviations", "limit_notes"}
+                         "featured", "game", "selection", "disclosures", "limits", "method", "preamble", "deviations", "limit_notes", "power_at_actual_n"}
     assert site["synthetic"] is True and isinstance(site["synthetic_meta"], dict)
     p = site["protocol"]
     assert p["lookback"] == 512 and p["samples"] == 11 and p["pred_len"] == 24 and p["days"] == 396
@@ -165,9 +165,10 @@ def test_tracked_site_json_must_not_be_synthetic():
 def test_only_site_json_is_trackable_under_site_data():
     tokens = (ROOT / ".gitignore").read_text().split()
     assert "site/data/*" in tokens and "!site/data/site.json" in tokens
+    assert {"!site/data/results_summary.csv", "!site/data/data_dictionary.csv", "!site/data/results.json"} <= set(tokens)
     assert "results/synthetic_demo/" in tokens
     ls = subprocess.run(["git", "-C", str(ROOT), "ls-files", "site/data"], capture_output=True, text=True).stdout.split()
-    assert set(ls) <= {"site/data/site.json"}
+    assert set(ls) <= {"site/data/site.json", "site/data/results_summary.csv", "site/data/data_dictionary.csv", "site/data/results.json"}
 
 
 def test_tracked_site_files_contain_no_local_paths():
@@ -338,5 +339,80 @@ def test_game_logic_node_tests():
     node = shutil.which("node")
     if not node:
         pytest.skip("node not installed")
-    r = subprocess.run([node, "--test", str(ROOT / "tests" / "node" / "game.test.js"), str(ROOT / "tests" / "node" / "svg.test.js"), str(ROOT / "tests" / "node" / "notes.test.js")], capture_output=True, text=True, cwd=ROOT)
+    r = subprocess.run([node, "--test", str(ROOT / "tests" / "node" / "game.test.js"), str(ROOT / "tests" / "node" / "svg.test.js"), str(ROOT / "tests" / "node" / "notes.test.js"), str(ROOT / "tests" / "node" / "plot.test.js")], capture_output=True, text=True, cwd=ROOT)
     assert r.returncode == 0, r.stdout[-2000:] + r.stderr[-1000:]
+
+
+# ---------------------------------------------------------------- Phase 7d
+def js_strings(text: str):
+    return [m.group(1) for m in re.finditer(r'"((?:[^"\\\n]|\\.)*)"', text)]
+
+
+def test_no_win_beat_or_edge_detected_wording_in_html_or_js_strings():
+    bad = re.compile(r"\b(win|beats?|edge detected)\b", re.I)
+    for p in PAGES:
+        html = (SITE / p).read_text()
+        text = re.sub(r"<script.*?</script>|<style.*?</style>|<[^>]+>", " ", html, flags=re.S)
+        assert not bad.search(text), f"{p}: {bad.search(text).group(0)}"
+    for f in sorted((SITE / "js").glob("*.js")):
+        for lit in js_strings(f.read_text()):
+            assert not bad.search(lit), f"{f.name}: {lit!r}"
+
+
+def test_plot_uses_neutral_colours_only():
+    css = (SITE / "style.css").read_text()
+    for rule in re.findall(r"svg \.(?:ci-[a-z]+|plot-[a-z]+)[^{]*\{[^}]*\}", css):
+        assert not re.search(r"#[0-9a-fA-F]{3,6}|--ok|--warn|--banner|red|green|--accent|--c-(kronos|actual)", rule), rule
+    plot = (SITE / "js" / "plot.js").read_text()
+    assert not re.search(r"#[0-9a-fA-F]{3,6}\b|\bred\b|\bgreen\b|fill:|stroke:", plot)
+    assert not re.search("[\U0001F300-\U0001FAFF\u2600-\u27BF]", "".join(f.read_text() for f in site_text_files()))   # no emoji
+
+
+def test_plot_numbers_are_all_in_site_json(site):
+    p = site["primary"]
+    for k in ("accuracy", "accuracy_diff"):
+        assert is_num(p[k])
+    for k in ("ci_accuracy", "ci_diff", "naive_binomial_ci95"):
+        assert len(p[k]) == 2 and all(is_num(v) for v in p[k]) and p[k][0] <= p[k][1], k
+    assert isinstance(site["protocol"]["ci_level"], int) and site["protocol"]["ci_level"] == 95
+    assert site["power_at_actual_n"]["rows"][0]["n"] == p["n"]
+
+
+def test_real_site_downloads_are_byte_identical_copies():
+    for name, src in (("results_summary.csv", "results/export/results_summary.csv"), ("data_dictionary.csv", "results/export/data_dictionary.csv"),
+                      ("results.json", "results/final/results.json")):
+        assert (ROOT / "site" / "data" / name).read_bytes() == (ROOT / src).read_bytes(), name
+    ev = (SITE / "js" / "evidence.js").read_text()
+    for href in ("data/results_summary.csv", "data/results.json", "data/data_dictionary.csv"):
+        assert f'href: "{href}"' in ev
+
+
+def _lum(h):
+    h = h.lstrip("#")
+    c = [int(h[i:i + 2], 16) / 255 for i in (0, 2, 4)]
+    c = [x / 12.92 if x <= 0.03928 else ((x + 0.055) / 1.055) ** 2.4 for x in c]
+    return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]
+
+
+def _ratio(a, b):
+    la, lb = sorted((_lum(a), _lum(b)), reverse=True)
+    return (la + 0.05) / (lb + 0.05)
+
+
+def test_text_contrast_is_at_least_4_5_in_light_and_dark():
+    css = (SITE / "style.css").read_text()
+    light = dict(re.findall(r"--([a-z-]+):\s*(#[0-9a-fA-F]{6})", re.search(r":root \{(.*?)\}", css, re.S).group(1)))
+    dark = dict(re.findall(r"--([a-z-]+):\s*(#[0-9a-fA-F]{6})", re.search(r"prefers-color-scheme: dark\) \{\s*:root \{(.*?)\}", css, re.S).group(1)))
+    for name, t in (("light", light), ("dark", {**light, **dark})):
+        pairs = [("fg", "bg"), ("fg", "card"), ("fg", "zebra"), ("muted", "bg"), ("muted", "card"), ("muted", "zebra"), ("accent", "bg"),
+                 ("accent", "card"), ("warn", "bg"), ("banner-fg", "banner-bg")]
+        for fg, bg in pairs:
+            assert _ratio(t[fg], t[bg]) >= 4.5, f"{name}: {fg} on {bg} = {_ratio(t[fg], t[bg]):.2f}"
+
+
+def test_css_has_phase7d_layout_rules():
+    css = (SITE / "style.css").read_text()
+    assert "max-width: 72rem" in css and "48rem" in css and ".hero" in css and "grid-template-columns" in css
+    assert "prefers-reduced-motion" in css and "@media print" in css and "tabular-nums" in css
+    assert "nth-child(even)" in css and "thead th { position: sticky" in css
+    assert ".badge.primary" in css and "dashed" in css.split(".badge {")[1].split("}")[0]     # shapes differ, not only colour

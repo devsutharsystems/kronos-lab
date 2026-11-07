@@ -1,8 +1,32 @@
 // Method and Limits pages: text is rendered from site.json (quoted from PREREGISTRATION.md at build time),
 // so no figures are typed into the HTML.
 window.KL = window.KL || {};
-KL.hints = { swipe: "Swipe sideways to see all columns",
-  results: "Only pre-registered and already-computed figures are shown. All rows except the all-pairs row at the primary horizon are exploratory." };
+KL.text = {
+  swipe: "Swipe sideways to see all columns",
+  results: "Only pre-registered and already-computed figures are shown. All rows except the all-pairs row at the primary horizon are exploratory.",
+  badgePrimary: "primary", badgeExploratory: "exploratory",
+  verdict: { h1: "Versus a coin flip", h2: "Versus always-up" },
+  est: { h1: "Kronos accuracy", h2: "Kronos accuracy minus always-up accuracy" },
+  decision: "Decision", rawP: "Raw p-value (exact test)", holmP: "Holm-adjusted p-value",
+  intervalName: (level) => level + " % day-block interval",
+  scored: "Origins scored", of: "out of", planned: "planned", downCalls: "Kronos down-calls",
+  powerScored: "Smallest detectable edge at the number scored", powerPlanned: "Smallest detectable edge at the planned number",
+  largestEdge: "Largest edge not ruled out (upper end of the interval)", overCoin: "over a coin flip", overAlwaysUp: "over always-up",
+  noDownCalls: "Kronos made no down-calls, so the comparison with always-up carries no information.",
+  downText: (d, shift) => "Kronos made " + d + " down-calls. The smallest detectable shift in the share of correct down-calls is about " + shift + ".",
+  powerCols: ["Analysis set N", "Smallest detectable edge", "Accuracy needed"],
+  plotTitle: "Where the estimates sit against their reference lines",
+  plot: { chartLabel: "Interval plot: Kronos accuracy and the accuracy difference with their intervals against reference lines",
+    rowNames: { accuracy: "Kronos accuracy", difference: "Kronos accuracy minus always-up accuracy" },
+    estimate: "estimate", interval: "interval", to: "to", reference: "reference", naive: "naive, ignores clustering",
+    crosses: "The interval includes the reference line", excludes: "The interval does not include the reference line" },
+  plotNote: "Diamond: estimate. Thick bar: the day-block interval. Thin bar: the naive interval. Dashed line: the reference value.",
+  downloads: { csv: "Download CSV", json: "Download JSON", dictionary: "Data dictionary" },
+  evidence: { allPairs: "All pairs, by horizon", byPair: "By pair, at the primary horizon",
+    cols: { horizon: "Horizon (bars)", n: "N", acc: "Kronos accuracy", pers: "Persistence accuracy (exploratory)", status: "Status", pair: "Pair" },
+    horizonPrefix: "h = " },
+};
+KL.hints = KL.text;   // older name
 
 (async function () {
   "use strict";

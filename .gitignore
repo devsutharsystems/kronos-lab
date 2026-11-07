@@ -14,3 +14,6 @@ results/smoke/
 results/synthetic_demo/
 site/data/*
 !site/data/site.json
+!site/data/results_summary.csv
+!site/data/data_dictionary.csv
+!site/data/results.json
