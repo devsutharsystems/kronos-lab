@@ -300,13 +300,53 @@ def test_exact_binomial_test_size_at_n1000_is_at_most_five_percent():
 
 
 # ---- Phase 5, amendment 2: primary results unchanged by the additive Inputs change -----------------------
+def assert_close(got, want, path="root"):
+    """Recursive comparison for floats that numpy/scipy may compute differently in the last digits on another platform.
+    Floats: math.isclose(rel_tol=1e-9, abs_tol=0), with abs_tol=1e-15 only when the expected value is exactly zero.
+    Everything else (ints, bools, strings such as decisions and headlines, None, list lengths, dict keys) must match EXACTLY."""
+    if isinstance(want, dict):
+        assert isinstance(got, dict) and set(got) == set(want), f"{path}: keys differ"
+        for k in want:
+            assert_close(got[k], want[k], f"{path}.{k}")
+    elif isinstance(want, (list, tuple)):
+        assert isinstance(got, (list, tuple)) and len(got) == len(want), f"{path}: length differs"
+        for i, (a, b) in enumerate(zip(got, want)):
+            assert_close(a, b, f"{path}[{i}]")
+    elif isinstance(want, float):
+        assert type(got) is float, f"{path}: {got!r} is not a float"
+        assert math.isclose(got, want, rel_tol=1e-9, abs_tol=1e-15 if want == 0.0 else 0.0), f"{path}: {got!r} != {want!r}"
+    else:
+        assert type(got) is type(want) and got == want, f"{path}: {got!r} != {want!r}"
+
+
+def test_assert_close_comparator_self_test():
+    base = {"p": 2.9822428956332436e-08, "ci": [0.5391076213158065, 0.25], "decision": "edge detected vs coin flip", "k": 7, "flag": True, "zero": 0.0, "none": None}
+    assert_close(dict(base), base)
+    near = dict(base, p=2.9822428956333005e-08, ci=[0.5391076213158063, 0.25])            # the last-digit differences seen on CI
+    assert_close(near, base)
+    assert_close(dict(base, zero=1e-16), base)                                                # abs_tol only for an exact expected zero
+    for bad in (dict(base, p=base["p"] * (1 + 1e-6)),                                         # relative change of 1e-6
+                dict(base, ci=[0.5391076213158065 * (1 + 1e-6), 0.25]),
+                dict(base, decision="no detectable edge"),                                    # flipped decision string
+                dict(base, k=8),                                                              # changed integer count
+                dict(base, k=7.0),                                                            # int vs float is a different type
+                dict(base, flag=False),
+                dict(base, none=0.0),
+                dict(base, zero=1e-12),
+                dict(base, ci=[0.5391076213158065]),                                          # list length
+                {k: v for k, v in base.items() if k != "k"},                                  # missing key
+                dict(base, extra=1)):                                                         # extra key
+        with pytest.raises(AssertionError):
+            assert_close(bad, base)
+
+
 def test_primary_results_identical_to_pre_phase5_golden():
     gold = json.loads((Path(__file__).parent / "golden" / "synthetic_primary_before_phase5.json").read_text())
     for name, g in gold.items():
         inp = A.synthetic_inputs(**g["kwargs"])
         res = A.run_analysis(inp, B=g["B"])
         got = A.clean({k: res["primary"][k] for k in g["primary"]})
-        assert got == g["primary"], name
+        assert_close(got, g["primary"], name)
         assert A.clean(res["primary"]["exclusions_h24"]) == g["exclusions_h24"], name
         # the new optional fields exist, have the right shape, and end at last_close
         assert inp.path.shape == (len(inp), 24) and inp.ctx_ohlc.shape == (len(inp), 72, 4)
