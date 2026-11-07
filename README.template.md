@@ -75,7 +75,7 @@ Added for this summary: one time window; one model size; crypto pairs only; cros
 ## Licences
 
 - Code: MIT, see `LICENSE`. The Kronos code is MIT too; its notice is in `third_party/KRONOS_LICENSE`.
-- Data sample, `results/` (including `results/export/`) and `site/data/`: CC BY-NC-SA 4.0, see `DATA_LICENSE.md`.
+- Binance-derived data (`data/sample/`, `results/final/`, `results/export/`, `results/data_*.json`, `site/data/`): CC BY-NC-SA 4.0. The spike measurements (`results/spike/`, `docs/spike_report.md`) come from the Kronos example CSV, not Binance, and are MIT; provenance records are in `docs/provenance/`. Details per group are in `DATA_LICENSE.md`.
 - Data: Binance Vision (data.binance.vision); not affiliated with or endorsed by Binance. This project is not affiliated with the Kronos authors.
 
 Not financial advice.

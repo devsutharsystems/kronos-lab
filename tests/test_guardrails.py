@@ -43,3 +43,28 @@ def test_no_secret_patterns_in_tracked_files():
             if pat.search(text):
                 hits.append((p, pat.pattern))
     assert hits == []
+
+
+def test_every_tracked_data_group_is_named_in_data_license():
+    import subprocess
+    root = Path(__file__).resolve().parent.parent
+    files = subprocess.run(["git", "-C", str(root), "ls-files", "data", "results", "site/data", "docs/provenance"], capture_output=True, text=True).stdout.split()
+    assert files
+    groups = set()
+    for f in files:
+        if f.endswith(".gitkeep"):                           # empty-directory placeholders hold no data
+            continue
+        parts = f.split("/")
+        if parts[0] == "site":
+            groups.add("site/data/")
+        elif parts[:2] == ["docs", "provenance"]:
+            groups.add("docs/provenance/")
+        elif len(parts) > 2:
+            groups.add("/".join(parts[:2]) + "/")          # data/sample/, results/final/, results/export/, results/spike/
+        else:
+            groups.add(f)                                    # a file directly under results/, e.g. results/data_quality.json
+    text = (root / "DATA_LICENSE.md").read_text()
+    missing = sorted(g for g in groups if g not in text)
+    assert not missing, f"not named in DATA_LICENSE.md: {missing}"
+    assert "docs/spike_report.md" in text and "Not affiliated with or endorsed by Binance" in text and "Not financial advice" in text
+    assert "Data: Binance Vision (data.binance.vision)" in text
