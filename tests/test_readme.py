@@ -12,8 +12,14 @@ import pytest
 ROOT = Path(__file__).resolve().parent.parent
 README = ROOT / "README.md"
 
+# One explicit derived value: the accuracy of an always-down rule is 1 minus the always-up accuracy (every analysis-set origin has a
+# non-zero label). A README number is accepted by this rule only if it equals 1 - primary.always_up_accuracy, as a percentage rounded to the
+# decimals shown. It is not a general "1 minus anything" pass.
+DERIVED_ALWAYS_DOWN = None
+
 # Protocol constants and notation allowed to appear without a source file (one comment each).
 ALLOWLIST = {
+    "256": "the SHA-256 algorithm argument in the shasum command of the reproduce block",
     "3.12.16": "interpreter version of the run environment, as stated by the author (Phase 1 environment check; its output is not in the repo)",
     "3.12": "Python series of the run environment (same source as 3.12.16) and of CI",
     "3.13": "first Python series on which the Phase 1 dry-run failed to resolve torch and the Kronos pins (author's account)",
@@ -52,21 +58,25 @@ def sources():
     res_bytes = (ROOT / "results" / "final" / "results.json").read_bytes()
     texts = [(ROOT / n).read_text() for n in ("PREREGISTRATION.md", "DEVIATIONS.md")]
     dq = (ROOT / "results" / "data_quality.json").read_text()
-    nums = {c for c in leaves(json.loads(res_bytes))} | {c for c in leaves(json.loads(dq))}
+    res = json.loads(res_bytes)
+    # exploratory blocks are excluded as trace sources: the README must not cite exploratory figures, and they would only match by coincidence
+    nums = {c for k, v in res.items() if not k.startswith("exploratory_") for c in leaves(v)} | {c for c in leaves(json.loads(dq))}
     text_tokens = {m.group(1) for t in texts for m in NUM.finditer(t)}
     # counts derived from restarts.log are cross-checked against DEVIATIONS.md inside the builder; both give the start count
     starts = int(re.search(r"restarts\.log has (\d+) starts", texts[1]).group(1))
+    derived = 1 - json.loads(res_bytes)["primary"]["always_up_accuracy"]       # the one explicit derived value (see DERIVED_ALWAYS_DOWN above)
     nums |= {starts, starts - 1}
     joined = "\n".join(texts) + "\n" + dq + "\n" + res_bytes.decode()
-    return nums, text_tokens, joined, hashlib.sha256(res_bytes).hexdigest()
+    return nums, text_tokens, joined, hashlib.sha256(res_bytes).hexdigest(), derived
 
 
 def is_commit(h):
     return subprocess.run(["git", "-C", str(ROOT), "cat-file", "-e", h + "^{commit}"], capture_output=True).returncode == 0
 
 
-def untraced(text: str) -> list:
-    nums, tokens, joined, res_sha = sources()
+def untraced(text: str, always_down=None) -> list:
+    nums, tokens, joined, res_sha, derived = sources()
+    derived = derived if always_down is None else always_down
     bad = []
     hexes = HEX.findall(text)
     for h in hexes:
@@ -95,6 +105,8 @@ def untraced(text: str) -> list:
                 continue
         elif any(round(abs(c) * k, d) == x for c in nums for k in (1, 100)):
             continue
+        elif round(derived * 100, d) == x:
+            continue
         bad.append(tok)
     return bad
 
@@ -115,6 +127,16 @@ def test_the_trace_check_is_not_vacuous():
     assert untraced(t + "\non 2031-01-01.") == ["2031-01-01"]
 
 
+def test_the_always_down_rule_is_narrow():
+    t = README.read_text()
+    p = json.loads((ROOT / "results" / "final" / "results.json").read_text())["primary"]["always_up_accuracy"]
+    shown = f"{(1 - p) * 100:.1f}"
+    assert f"would have scored {shown}%" in t and "descriptive, not pre-registered; no test was run" in t
+    assert untraced(t) == []
+    # without the rule (derived value replaced by one that does not match) the always-down figure is the only thing flagged
+    assert untraced(t, always_down=0.0) == [shown]
+
+
 def test_readme_banned_wording_and_required_notices():
     t = README.read_text()
     low = t.lower()
@@ -123,7 +145,8 @@ def test_readme_banned_wording_and_required_notices():
     assert "Data: Binance Vision (data.binance.vision); not affiliated with or endorsed by Binance." in t
     assert "rerun everything from the hashes" not in low
     assert "bit-for-bit reproduction on other hardware is not claimed" in t
-    assert "If the forecast file is obtained" in t or "if the forecast file is obtained" in t
+    assert "The forecast file is not in this repository" in t and "if it is supplied" in t
+    assert "can be rerun if the forecast file is obtained" not in t
 
 
 def test_readme_has_no_exploratory_figures():

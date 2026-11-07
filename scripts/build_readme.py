@@ -154,6 +154,11 @@ def pct(x, d=1):
     return f"{x * 100:.{d}f}%"
 
 
+def compare_word(a: float, b: float) -> str:
+    """Wording for how `a` compares with `b`, chosen from the numbers (never typed in the template)."""
+    return "above" if a > b else "below" if a < b else "equal to"
+
+
 def pp(x, d=1):
     return f"{x * 100:+.{d}f}"
 
@@ -195,7 +200,10 @@ def fields(root: Path = ROOT) -> dict:
         f"rather than the {planned} planned, and the forecasts come from one run on one Apple-silicon machine (MPS).")
     f["alwaysup_note"] = (
         f"**Always-up baseline (descriptive, not pre-registered).** Always-up accuracy is the share of analysis-set origins that closed up. "
-        f"At {pct(P['always_up_accuracy'])} it is below one half: this window had more down days than up days, so always-up is a weak baseline here.")
+        f"At {pct(P['always_up_accuracy'])} it is below one half: this window had more down days than up days, so always-up is a weak baseline here. "
+        f"Every analysis-set origin has a non-zero label, so a rule that always predicted down would have scored {pct(1 - P['always_up_accuracy'])} on the same origins, "
+        f"which is {compare_word(1 - P['always_up_accuracy'], P['accuracy'])} Kronos's {pct(P['accuracy'])} "
+        f"(descriptive, not pre-registered; no test was run).")
     f["stop_paragraph"] = (
         f"The pre-registered cutoff ({re.search(r'cutoff (2026-[0-9T:-]+Z)', dev).group(1)}) passed while the run was paused by the author, so it stopped with "
         f"{ndone} of {planned} origins ({planned - ndone} never run). The runner was started {starts} times: it was interrupted by SIGINT and resumed "

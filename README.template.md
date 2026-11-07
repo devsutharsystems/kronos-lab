@@ -26,7 +26,7 @@ Exploratory figures (per pair, per horizon and others) are on the site's Evidenc
 
 - **Curious readers** get a reality check on claims that AI models can predict prices: one model, one window, a result reported as it came out.
 - **Students** get a worked template for a pre-registered evaluation: a plan committed before the run, a decision rule, a deviations log, and an analysis run once.
-- **People who want to check the work** can verify the pre-registration commit, the file hashes and the code. The analysis can be rerun if the forecast file is obtained (its sha256 is in `DEVIATIONS.md`). Regenerating the forecasts needs Apple-silicon MPS and several hours, and bit-for-bit reproduction on other hardware is not claimed.
+- **People who want to check the work** can verify the pre-registration commit, the file hashes and the code. The forecast file is not in this repository (its sha256 is in `DEVIATIONS.md`); the analysis can be rerun on it if it is supplied. Regenerating the forecasts needs Apple-silicon MPS and several hours, and bit-for-bit reproduction on other hardware is not claimed.
 
 What this does not show: it covers one time window, one model size, and crypto pairs only. Small effects are not excluded. It is not a trading tool.
 

@@ -12,7 +12,7 @@ Kronos direction accuracy was 51.0% (1035 of 2028), with a 95% day-block bootstr
 
 **Note on H2.** The exact test's Holm-adjusted p-value versus always-up was 0.046, which is below 0.05 on its own. The pre-registered rule also requires the day-block interval for the accuracy difference to exclude zero; it runs from -1.7 to +9.0 percentage points, so no edge is declared. Both numbers are reported. The exact tests treat origins as independent, which is why the interval condition is part of the rule.
 
-**Always-up baseline (descriptive, not pre-registered).** Always-up accuracy is the share of analysis-set origins that closed up. At 47.3% it is below one half: this window had more down days than up days, so always-up is a weak baseline here.
+**Always-up baseline (descriptive, not pre-registered).** Always-up accuracy is the share of analysis-set origins that closed up. At 47.3% it is below one half: this window had more down days than up days, so always-up is a weak baseline here. Every analysis-set origin has a non-zero label, so a rule that always predicted down would have scored 52.7% on the same origins, which is above Kronos's 51.0% (descriptive, not pre-registered; no test was run).
 
 Exploratory figures (per pair, per horizon and others) are on the site's Evidence page and in `results/final/results.json`. They are labelled exploratory and are not part of this summary.
 
@@ -28,7 +28,7 @@ The analysis code (`kronos_lab/analysis.py`) was first committed in `e62973b3` (
 
 - **Curious readers** get a reality check on claims that AI models can predict prices: one model, one window, a result reported as it came out.
 - **Students** get a worked template for a pre-registered evaluation: a plan committed before the run, a decision rule, a deviations log, and an analysis run once.
-- **People who want to check the work** can verify the pre-registration commit, the file hashes and the code. The analysis can be rerun if the forecast file is obtained (its sha256 is in `DEVIATIONS.md`). Regenerating the forecasts needs Apple-silicon MPS and several hours, and bit-for-bit reproduction on other hardware is not claimed.
+- **People who want to check the work** can verify the pre-registration commit, the file hashes and the code. The forecast file is not in this repository (its sha256 is in `DEVIATIONS.md`); the analysis can be rerun on it if it is supplied. Regenerating the forecasts needs Apple-silicon MPS and several hours, and bit-for-bit reproduction on other hardware is not claimed.
 
 What this does not show: it covers one time window, one model size, and crypto pairs only. Small effects are not excluded. It is not a trading tool.
 
