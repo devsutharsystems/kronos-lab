@@ -14,6 +14,10 @@ README = ROOT / "README.md"
 
 # Protocol constants and notation allowed to appear without a source file (one comment each).
 ALLOWLIST = {
+    "3.12.16": "interpreter version of the run environment, as stated by the author (Phase 1 environment check; its output is not in the repo)",
+    "3.12": "Python series of the run environment (same source as 3.12.16) and of CI",
+    "3.13": "first Python series on which the Phase 1 dry-run failed to resolve torch and the Kronos pins (author's account)",
+    "3.15": "last Python series in that failed range (author's account)",
     "8010": "local port used in the serve command",
     "0.5": "chance level for a two-way call (definition of a coin flip)",
 }

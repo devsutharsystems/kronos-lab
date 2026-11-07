@@ -70,6 +70,8 @@ python3 scripts/serve_site.py --port 8010
 shasum -a 256 data/processed/*.csv results/final/results.json
 ```
 
+**Python version.** The run environment (`.venv-kronos`) used Python 3.12.16. In the author's Phase 1 pip dry-run, torch and the Kronos pins resolved as wheels on Python 3.12 and failed to resolve on Python 3.13 to 3.15. The output of that check is not stored in the repository; this sentence records the author's account of it. The analysis scripts need no torch and install from `requirements-dev.txt`.
+
 The run needs MPS: the runner refuses to start without it, and MPS and CPU outputs differ. `analyze.py` refuses to run until `results/runs/DONE` exists, and it copies that file's contents into `results.json`, so a rerun with its own `DONE` file will differ from the committed `results.json` in that timestamp.
 
 Expected hashes (sha256):
