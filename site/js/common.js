@@ -13,6 +13,11 @@
     return e;
   }
 
+  // A pair chip: the hue is identity, the text label carries the same information.
+  function chip(pair) {
+    return el("span", { class: ("chip " + KLChips.hueClass(pair)).trim(), title: pair, text: KLChips.label(pair) });
+  }
+
   function get(obj, path) {
     return path.split(".").reduce((o, k) => (o == null ? undefined : o[k]), obj);
   }
@@ -99,5 +104,5 @@
     }
   }
 
-  root.KL = Object.assign(root.KL || {}, { el, get, fmt, applyFmt, table, loadSite, bindAll });
+  root.KL = Object.assign(root.KL || {}, { el, chip, get, fmt, applyFmt, table, loadSite, bindAll });
 })(window);

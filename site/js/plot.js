@@ -12,8 +12,8 @@
     const p = site.primary;
     if (typeof p.accuracy !== "number" || !finite2(p.ci_accuracy) || typeof p.accuracy_diff !== "number" || !finite2(p.ci_diff)) return null;
     return [
-      { id: "accuracy", est: p.accuracy, ci: p.ci_accuracy, naive: finite2(p.naive_binomial_ci95) ? p.naive_binomial_ci95 : null, ref: CHANCE },
-      { id: "difference", est: p.accuracy_diff, ci: p.ci_diff, naive: null, ref: NULL_DIFF },
+      { id: "accuracy", tone: "h1", est: p.accuracy, ci: p.ci_accuracy, naive: finite2(p.naive_binomial_ci95) ? p.naive_binomial_ci95 : null, ref: CHANCE },
+      { id: "difference", tone: "h2", est: p.accuracy_diff, ci: p.ci_diff, naive: null, ref: NULL_DIFF },
     ];
   }
 
@@ -65,7 +65,7 @@
         svg.appendChild(S.s("line", { class: "ci-naive", x1: x(row.naive[0]), x2: x(row.naive[1]), y1: mid + 20, y2: mid + 20 }));
         svg.appendChild(S.s("text", { x: x(row.naive[1]) + 6, y: mid + 24, class: "plot-note" }, t.naive));
       }
-      svg.appendChild(S.s("line", { class: "ci-main", x1: x(row.ci[0]), x2: x(row.ci[1]), y1: mid, y2: mid }));
+      svg.appendChild(S.s("line", { class: "ci-main " + row.tone, x1: x(row.ci[0]), x2: x(row.ci[1]), y1: mid, y2: mid }));
       [row.ci[0], row.ci[1]].forEach((v) => svg.appendChild(S.s("line", { class: "ci-cap", x1: x(v), x2: x(v), y1: mid - 7, y2: mid + 7 })));
       const cx = x(row.est);
       svg.appendChild(S.s("path", { class: "ci-point", d: "M" + cx + " " + (mid - 8) + " L" + (cx + 8) + " " + mid + " L" + cx + " " + (mid + 8) + " L" + (cx - 8) + " " + mid + " Z" }));

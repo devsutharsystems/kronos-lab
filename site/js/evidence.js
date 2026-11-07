@@ -23,15 +23,16 @@
       (v) => String(v + 1), (v) => fmt.signedPct(v, sc.decimals));
     const xs = f.mean.map((_, k) => x(k));
     svg.appendChild(S.s("line", { class: "s-zero", x1: l, x2: W - r, y1: y(0), y2: y(0) }));
-    f.samples.forEach((p) => svg.appendChild(S.s("path", { class: "s-sample", d: S.pathD(xs, p.map(y)) })));
+    f.samples.forEach((p) => svg.appendChild(S.s("path", { class: ("s-sample " + KLChips.hueClass(f.pair)).trim(), d: S.pathD(xs, p.map(y)) })));
     svg.appendChild(S.s("path", { class: "s-mean", d: S.pathD(xs, f.mean.map(y)) }));
     svg.appendChild(S.s("path", { class: "s-actual", d: S.pathD(xs, f.actual.map(y)) }));
     document.getElementById("fan").replaceChildren(svg);
     const dir = (v) => (v > 0 ? "up" : v < 0 ? "down" : "flat");
     const kronosEnd = f.mean[n - 1], actualEnd = f.actual[n - 1];
-    document.getElementById("fan-caption").textContent =
-      f.pair + ", " + f.date + ". Kronos's mean path ends " + dir(kronosEnd) + " (" + fmt.signedPct(kronosEnd) + "); the actual path ends " +
+    const capText =
+      " " + f.date + ". Kronos's mean path ends " + dir(kronosEnd) + " (" + fmt.signedPct(kronosEnd) + "); the actual path ends " +
       dir(actualEnd) + " (" + fmt.signedPct(actualEnd) + "). Kronos's call was " + (f.signal_24 === f.label_24 ? "correct" : "wrong") + " for this origin.";
+    document.getElementById("fan-caption").replaceChildren(KL.chip(f.pair), document.createTextNode(capText));
   }
   sel.addEventListener("change", () => drawFan(Number(sel.value)));
   if (site.featured.length) drawFan(0);
@@ -73,7 +74,7 @@
   const rt = site.results_table;
   const allRows = rt.all_pairs.map((r) => ({ cls: r.primary ? "primary-row" : "", cells: [E.horizonPrefix + r.horizon, fmt.int(r.n), fmt.pct(r.kronos_accuracy),
     fmt.pct(r.persistence_accuracy), badge(r.primary)] }));
-  const pairRows = rt.by_pair_h24.map((r) => ({ cells: [r.pair, fmt.int(r.n), fmt.pct(r.kronos_accuracy), badge(false)] }));
+  const pairRows = rt.by_pair_h24.map((r) => ({ cells: [KL.chip(r.pair), fmt.int(r.n), fmt.pct(r.kronos_accuracy), badge(false)] }));
   const resultsEl = document.getElementById("results");
   const intro = [el("p", { class: "small", text: T.swipe })];
   if (!site.synthetic) intro.unshift(el("p", { text: T.results }));

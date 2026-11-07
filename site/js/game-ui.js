@@ -43,10 +43,14 @@
   function renderTallies() {
     const t = G.tallies(state);
     talliesEl.replaceChildren(
-      el("div", {}, [el("strong", { text: String(t.you) }), "You"]),
-      el("div", {}, [el("strong", { text: String(t.kronos) }), "Kronos"]),
-      el("div", {}, [el("strong", { text: String(t.coin) }), "Coin flip"]));
-    document.getElementById("progress").textContent = "Answered " + t.answered + " of " + total;
+      el("div", { class: "you" }, [el("strong", { text: String(t.you) }), "You"]),
+      el("div", { class: "kronos" }, [el("strong", { text: String(t.kronos) }), "Kronos"]),
+      el("div", { class: "coin" }, [el("strong", { text: String(t.coin) }), "Coin flip"]));
+    document.getElementById("progress").textContent = KL.text.game.progress(t.answered, total);
+    const bar = document.getElementById("progressbar");
+    bar.setAttribute("aria-valuemax", String(total));
+    bar.setAttribute("aria-valuenow", String(t.answered));
+    bar.firstElementChild.style.width = (total ? (t.answered / total) * 100 : 0) + "%";
   }
 
   function showWindow() {
@@ -79,9 +83,9 @@
     const msg = "The close ended " + word(rec.truth) + ". You called " + word(rec.you) + " (" + (rec.youHit ? "right" : "wrong") + "). Kronos called " +
       word(rec.kronos) + " (" + (rec.kronosHit ? "right" : "wrong") + "). The coin flip said " + word(rec.coin) + " (" + (rec.coinHit ? "right" : "wrong") + ").";
     live.textContent = msg;
-    stage.appendChild(el("p", { text: msg }));
-    stage.appendChild(el("p", { class: "small", text: "This was " + win.reveal.pair + " on " + win.reveal.date + "." }));
-    const nextBtn = el("button", { type: "button", id: "btn-next" }, [state.index + 1 >= total ? "See final result" : "Next window"]);
+    stage.appendChild(el("p", { class: "reveal", text: msg }));
+    stage.appendChild(el("p", { class: "small reveal" }, [KL.text.game.thisWas, KL.chip(win.reveal.pair), KL.text.game.on + win.reveal.date + "."]));
+    const nextBtn = el("button", { type: "button", id: "btn-next", class: "reveal" }, [state.index + 1 >= total ? "See final result" : "Next window"]);
     nextBtn.addEventListener("click", () => { state = G.next(state); renderTallies(); G.isFinished(state, total) ? finish() : showWindow(); });
     stage.appendChild(nextBtn);
     renderTallies();

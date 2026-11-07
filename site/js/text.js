@@ -5,6 +5,10 @@ KL.text = {
   swipe: "Swipe sideways to see all columns",
   results: "Only pre-registered and already-computed figures are shown. All rows except the all-pairs row at the primary horizon are exploratory.",
   badgePrimary: "primary", badgeExploratory: "exploratory",
+  verdictTag: { h1: "H1", h2: "H2" },
+  toc: "On this page",
+  callout: { deviation: "Recorded deviation", limit: "Limit", disclosure: "Disclosure" },
+  game: { progress: (a, t) => "Answered " + a + " of " + t, thisWas: "This was ", on: " on " },
   verdict: { h1: "Versus a coin flip", h2: "Versus always-up" },
   est: { h1: "Kronos accuracy", h2: "Kronos accuracy minus always-up accuracy" },
   decision: "Decision", rawP: "Raw p-value (exact test)", holmP: "Holm-adjusted p-value",
@@ -73,8 +77,8 @@ KL.hints = KL.text;   // older name
         m.appendChild(el("h2", { id: "recorded-deviations", text: "Recorded deviations" }));
         if (!site.deviations.length) m.appendChild(el("p", { text: "No deviations are recorded." }));
         site.deviations.forEach((d) => {
-          m.appendChild(el("h3", { text: d.date + (d.title ? ": " + d.title : "") }));
-          m.appendChild(el("p", { text: d.text }));
+          m.appendChild(el("div", { class: "callout deviation" }, [el("div", { class: "label", text: KL.text.callout.deviation }),
+            el("h3", { text: d.date + (d.title ? ": " + d.title : "") }), el("p", { text: d.text })]));
         });
       }
     });
@@ -82,17 +86,38 @@ KL.hints = KL.text;   // older name
   document.querySelectorAll(".preamble").forEach((n) => { n.textContent = site.preamble; });
   const lim = document.getElementById("limits-list");
   if (lim) site.limits.forEach((t) => {
-    const li = richInto(el("li"), t);
+    const li = richInto(el("li", { class: "callout limit" }), t);
+    li.insertBefore(el("div", { class: "label", text: KL.text.callout.limit }), li.firstChild);
     site.limit_notes.filter((n) => t.includes(n.contains)).forEach((n) => li.appendChild(el("div", { class: "small", text: n.text })));
     lim.appendChild(li);
   });
   const dis = document.getElementById("disclosures-list");
-  if (dis) site.disclosures.forEach((t) => dis.appendChild(richInto(el("li"), t)));
+  if (dis) site.disclosures.forEach((t) => {
+    const li = richInto(el("li", { class: "callout disclosure" }), t);
+    li.insertBefore(el("div", { class: "label", text: KL.text.callout.disclosure }), li.firstChild);
+    dis.appendChild(li);
+  });
   const sel = document.getElementById("selection-rules");
   if (sel) {
     const s = site.selection;
     [s.pool, "Fan-chart origins: " + s.featured.rule + ", seed " + s.featured.seed + ", " + s.featured.n + " origins.",
       "Game windows: " + s.game.rule + ", seed " + s.game.seed + ", " + s.game.n + " windows.",
       "Coin flips: " + s.coin_flips.rule + ", seed " + s.coin_flips.seed + ".", s.reveal_note].forEach((t) => sel.appendChild(el("li", { text: t })));
+  }
+
+  // In-page table of contents from the long-form headings (shown on wide screens; see style.css)
+  const toc = document.getElementById("toc");
+  if (toc) {
+    const used = new Set(), ul = el("ul");
+    document.querySelectorAll(".longform h2").forEach((h, i) => {
+      if (!h.id) {
+        let id = h.textContent.toLowerCase().replace(/[^a-z]+/g, "-").replace(/^-|-$/g, "") || "section";
+        while (used.has(id) || document.getElementById(id)) id += "-x";
+        h.id = id;
+      }
+      used.add(h.id);
+      ul.appendChild(el("li", {}, [el("a", { href: "#" + h.id, text: h.textContent })]));
+    });
+    toc.replaceChildren(el("p", { text: KL.text.toc }), ul);
   }
 })();

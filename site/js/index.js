@@ -37,8 +37,8 @@
   // Verdict cards (neutral styling; the decision text is shown exactly as it is in site.json)
   const level = site.protocol.ci_level;
   const row = (k, v) => el("div", { class: "kv" }, [el("span", { class: "k", text: k }), el("span", { class: "v", text: v })]);
-  const verdict = (key, title, est, estText, ci, ciFmt, praw, pholm, decision) => el("section", { class: "card verdict", "aria-label": title }, [
-    el("h3", { text: title }), el("p", { class: "decision", text: decision }),
+  const verdict = (key, title, est, estText, ci, ciFmt, praw, pholm, decision) => el("section", { class: "card verdict " + key, "aria-label": title }, [
+    el("h3", {}, [el("span", { class: "tag", text: T.verdictTag[key] }), title]), el("p", { class: "decision", text: decision }),
     row(est, estText), row(T.intervalName(level), ci.map(ciFmt).join(" to ")), row(T.rawP, fmt.p(praw)), row(T.holmP, fmt.p(pholm))]);
   document.getElementById("verdicts").replaceChildren(
     verdict("h1", T.verdict.h1, T.est.h1, fmt.pct(p.accuracy), p.ci_accuracy, (v) => fmt.pct(v), p.p_h1_raw, p.p_h1_holm, site.headline.decision_h1),

@@ -8,6 +8,9 @@ import subprocess
 from pathlib import Path
 
 import pytest
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import colour as C  # noqa: E402  (tests/colour.py)
 
 from kronos_lab import analysis as A
 
@@ -339,7 +342,7 @@ def test_game_logic_node_tests():
     node = shutil.which("node")
     if not node:
         pytest.skip("node not installed")
-    r = subprocess.run([node, "--test", str(ROOT / "tests" / "node" / "game.test.js"), str(ROOT / "tests" / "node" / "svg.test.js"), str(ROOT / "tests" / "node" / "notes.test.js"), str(ROOT / "tests" / "node" / "plot.test.js")], capture_output=True, text=True, cwd=ROOT)
+    r = subprocess.run([node, "--test", str(ROOT / "tests" / "node" / "game.test.js"), str(ROOT / "tests" / "node" / "svg.test.js"), str(ROOT / "tests" / "node" / "notes.test.js"), str(ROOT / "tests" / "node" / "plot.test.js"), str(ROOT / "tests" / "node" / "chips.test.js")], capture_output=True, text=True, cwd=ROOT)
     assert r.returncode == 0, r.stdout[-2000:] + r.stderr[-1000:]
 
 
@@ -416,3 +419,143 @@ def test_css_has_phase7d_layout_rules():
     assert "prefers-reduced-motion" in css and "@media print" in css and "tabular-nums" in css
     assert "nth-child(even)" in css and "thead th { position: sticky" in css
     assert ".badge.primary" in css and "dashed" in css.split(".badge {")[1].split("}")[0]     # shapes differ, not only colour
+
+
+# ---------------------------------------------------------------- Phase 7e: palette, contrast, structure
+PAIR_TOKENS = ["pair-btc", "pair-eth", "pair-sol", "pair-xrp", "pair-bnb", "pair-doge"]
+
+
+def css_tokens():
+    css = (SITE / "style.css").read_text()
+    parse = lambda b: {k: v.strip() for k, v in re.findall(r"--([a-z0-9-]+):\s*([^;]+);", b)}
+    light = parse(re.search(r":root \{(.*?)\}", css, re.S).group(1))
+    dark = {**light, **parse(re.search(r"prefers-color-scheme: dark\) \{\s*:root \{(.*?)\}", css, re.S).group(1))}
+    return {"light": light, "dark": dark}
+
+
+def pct(v):
+    return float(v.rstrip("%"))
+
+
+def glass(t):
+    m = re.fullmatch(r"rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)", t["glass-bg"])
+    return (int(m.group(1)), int(m.group(2)), int(m.group(3))), float(m.group(4))
+
+
+def test_pair_hues_are_pairwise_distinct_ciede2000_at_least_15():
+    for theme, t in css_tokens().items():
+        d = C.distance_table({k: t[k] for k in PAIR_TOKENS})
+        assert len(d) == 15
+        worst = min(d.items(), key=lambda kv: kv[1])
+        assert worst[1] >= 15, f"{theme}: {worst[0]} = {worst[1]:.1f}"
+
+
+def test_identity_hues_avoid_green_and_red_and_are_not_outcome_colours():
+    css = (SITE / "style.css").read_text()
+    for theme, t in css_tokens().items():
+        for k in PAIR_TOKENS + ["h1", "h2", "mesh-1", "mesh-2", "mesh-3", "mesh-4"]:
+            hue = C.hue_degrees(t[k])
+            assert not (70 <= hue <= 170), f"{theme} {k} {t[k]} is green ({hue:.0f})"
+            assert not (hue >= 340 or hue <= 20), f"{theme} {k} {t[k]} is red/red-orange ({hue:.0f})"
+    assert not any(k in css_tokens()["light"] for k in ("ok", "c-up", "c-down", "c-kronos", "c-actual"))
+    for sel, body in re.findall(r"([^{}@]+)\{([^{}]*)\}", re.sub(r"/\*.*?\*/", "", css, flags=re.S)):
+        sel = sel.strip()
+        if "var(--warn)" in body:                                   # warning red is for warnings and the synthetic banner only
+            assert sel.startswith(".warn"), sel
+        if "var(--banner" in body:
+            assert sel.startswith("#synthetic-banner"), sel
+        if "var(--pair-" in body and not sel.startswith(":root"):
+            assert sel.startswith(".pair-"), sel                    # pair hues are consumed only through .pair-* classes
+        if "var(--h1)" in body or "var(--h2)" in body:
+            assert re.match(r"(\.verdict|\.tag|svg \.ci-main)", sel), sel
+
+
+def test_candles_use_neutral_colours_only():
+    css = (SITE / "style.css").read_text()
+    for cls in ("candle-up", "candle-down", "wick"):
+        rule = re.search(r"svg \." + cls + r" \{[^}]*\}", css).group(0)
+        assert not re.search(r"#[0-9a-fA-F]{3,6}|--pair|--h1|--h2|--accent|--warn", rule), rule
+    assert "svg .candle-up { fill: var(--bg)" in css and "svg .candle-down { fill: var(--fg)" in css       # hollow above open, filled below open
+    ui = (SITE / "js" / "game-ui.js").read_text()
+    assert 'cl >= o ? "candle-up" : "candle-down"' in ui
+
+
+def test_new_tokens_meet_contrast_in_light_and_dark():
+    for theme, t in css_tokens().items():
+        bg, fg, muted = t["bg"], t["fg"], t["muted"]
+        # text on chips (hue tint over the page background)
+        for k in PAIR_TOKENS:
+            chip_bg = C.mix(t[k], bg, pct(t["chip-mix"]))
+            assert C.cr_rgb(fg, chip_bg) >= 4.5, f"{theme} chip {k}"
+            assert C.cr(t[k], bg) >= 3, f"{theme} {k} graphic on page"          # chip border / sampled paths
+        # verdict cards: tinted glass over the page; tag text on the page background
+        g, a = glass(t)
+        base = C.over(g, a, bg)
+        for k in ("h1", "h2"):
+            vbg = C.mix(t[k], base, pct(t["tint-mix"]))
+            assert C.cr_rgb(fg, vbg) >= 4.5 and C.cr_rgb(muted, vbg) >= 4.5, f"{theme} verdict {k}"
+            assert C.cr(t[k], bg) >= 4.5, f"{theme} {k} tag text"
+        # hero mesh: text against the worst point (every stop, every 50 % mix of two stops, and the page background), bare and under glass
+        stops = [C.rgb(t[f"mesh-{i}"]) for i in (1, 2, 3, 4)]
+        points = stops + [C.mix(x, y, 50) for i, x in enumerate(stops) for y in stops[i + 1:]] + [C.rgb(bg)]
+        for pt in points:
+            for txt in (fg, muted):
+                assert C.cr_rgb(txt, pt) >= 4.5, f"{theme} text {txt} on mesh {C.hexs(pt)}"
+                assert C.cr_rgb(txt, C.over(g, a, C.hexs(pt))) >= 4.5, f"{theme} text on glass over {C.hexs(pt)}"
+        # UI borders and graphics
+        for k in ("fg", "muted", "accent", "h1", "h2"):
+            assert C.cr(t[k], bg) >= 3, f"{theme} {k} graphic"
+        # text on the surfaces that carry the callouts, statcards and sticky table headers
+        for k in ("card", "zebra"):
+            assert C.cr(fg, t[k]) >= 4.5 and C.cr(muted, t[k]) >= 4.5, f"{theme} {k}"
+        # decorative table gridlines (--line) are not required to reach 3:1; they never carry meaning on their own
+        assert C.cr(fg, t["bg"]) >= 7
+
+
+def test_result_page_puts_the_decision_text_first_in_the_dom():
+    html = (SITE / "index.html").read_text()
+    main = html.split("<main>")[1]
+    i = main.index('id="headline-text"')
+    for later in ('id="verdicts"', 'id="interval-plot"', 'id="statcards"', 'id="power-table"'):
+        assert main.index(later) > i, later
+    before = re.sub(r"<svg.*?</svg>|<!--.*?-->", "", main[:main.rfind("<", 0, i)], flags=re.S)
+    assert re.sub(r"<[^>]+>", " ", before).split() == ["What", "the", "test", "found"] and 'class="sr-only"' in before   # nothing visible earlier
+    assert re.search(r'id="load-error"[^>]*hidden', before)
+    js = (SITE / "js" / "index.js").read_text()
+    assert js.count('getElementById("headline-text")') == 1 and 'getElementById("headline-text").textContent = site.headline.headline;' in js
+    css = (SITE / "style.css").read_text()
+    assert re.search(r"\.motif \{[^}]*position: absolute", css) and re.search(r"\.hero-band \{[^}]*padding: clamp\(", css)   # the motif takes no flow space
+    assert 'class="motif"' in html and 'aria-hidden="true"' in html.split('class="motif"')[1].split(">")[0]
+
+
+def test_decorative_motif_is_flat_or_alternating_and_symmetric():
+    html = (SITE / "index.html").read_text()
+    comment = [int(x) for x in re.search(r"motif closes: ([-\d ]+) \(", html).group(1).split()]
+    candles = re.findall(r'<g data-close="(-?\d+)"><line[^>]*/><rect class="([a-z-]+)"', html)
+    closes = [int(c) for c, _ in candles]
+    assert closes == comment and len(closes) >= 7
+    assert closes == closes[::-1]                                   # palindromic: symmetric about its start and end value
+    assert closes[0] == closes[-1]                                  # no net trend
+    opens = [closes[0]] + closes[:-1]
+    for (c, cls), o in zip(candles, opens):
+        assert cls == ("candle-up" if int(c) > o else "candle-down")
+    ups = [b > a for a, b in zip(closes, closes[1:])]
+    assert any(ups) and not all(ups)                                # alternates; never one rising run
+
+
+def test_pair_chips_carry_text_and_every_pair_has_a_hue_class():
+    chips = (SITE / "js" / "chips.js").read_text()
+    for lab in ("BTC", "ETH", "SOL", "XRP", "BNB", "DOGE"):
+        assert f'"{lab}"' in chips
+    css = (SITE / "style.css").read_text()
+    for cls in ("pair-btc", "pair-eth", "pair-sol", "pair-xrp", "pair-bnb", "pair-doge"):
+        assert f".{cls} {{" in css
+    assert "evidence.js" and "KL.chip(r.pair)" in (SITE / "js" / "evidence.js").read_text()
+
+
+def test_motion_is_reduced_on_request_and_pages_have_no_external_fonts():
+    css = (SITE / "style.css").read_text()
+    for kw in ("animation", "transition"):
+        assert kw in css
+    assert "prefers-reduced-motion: reduce" in css and "animation: none !important" in css and "transition: none !important" in css
+    assert "@font-face" not in css and "font-family" in css and "url(" not in css and "@import" not in css
