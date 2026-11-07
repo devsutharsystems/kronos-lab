@@ -7,6 +7,7 @@
   const T = KL.text;
 
   document.getElementById("headline-text").textContent = site.headline.headline;
+  document.getElementById("allnums-title").textContent = T.allNumbers;
   document.getElementById("underpowered").hidden = !site.headline.underpowered;
 
   const p = site.primary;

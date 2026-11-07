@@ -342,7 +342,7 @@ def test_game_logic_node_tests():
     node = shutil.which("node")
     if not node:
         pytest.skip("node not installed")
-    r = subprocess.run([node, "--test", str(ROOT / "tests" / "node" / "game.test.js"), str(ROOT / "tests" / "node" / "svg.test.js"), str(ROOT / "tests" / "node" / "notes.test.js"), str(ROOT / "tests" / "node" / "plot.test.js"), str(ROOT / "tests" / "node" / "chips.test.js")], capture_output=True, text=True, cwd=ROOT)
+    r = subprocess.run([node, "--test", str(ROOT / "tests" / "node" / "game.test.js"), str(ROOT / "tests" / "node" / "svg.test.js"), str(ROOT / "tests" / "node" / "notes.test.js"), str(ROOT / "tests" / "node" / "plot.test.js"), str(ROOT / "tests" / "node" / "chips.test.js"), str(ROOT / "tests" / "node" / "pages.test.js")], capture_output=True, text=True, cwd=ROOT)
     assert r.returncode == 0, r.stdout[-2000:] + r.stderr[-1000:]
 
 
@@ -453,11 +453,11 @@ def test_pair_hues_are_pairwise_distinct_ciede2000_at_least_15():
 def test_identity_hues_avoid_green_and_red_and_are_not_outcome_colours():
     css = (SITE / "style.css").read_text()
     for theme, t in css_tokens().items():
-        for k in PAIR_TOKENS + ["h1", "h2", "mesh-1", "mesh-2", "mesh-3", "mesh-4"]:
+        for k in PAIR_TOKENS + ["h1", "h2", "you", "kronos", "coin", "mesh-1", "mesh-2", "mesh-3", "mesh-4"]:
             hue = C.hue_degrees(t[k])
             assert not (70 <= hue <= 170), f"{theme} {k} {t[k]} is green ({hue:.0f})"
             assert not (hue >= 340 or hue <= 20), f"{theme} {k} {t[k]} is red/red-orange ({hue:.0f})"
-    assert not any(k in css_tokens()["light"] for k in ("ok", "c-up", "c-down", "c-kronos", "c-actual"))
+    assert not any(k in css_tokens()["light"] for k in ("ok", "c-up", "c-down", "c-actual"))
     for sel, body in re.findall(r"([^{}@]+)\{([^{}]*)\}", re.sub(r"/\*.*?\*/", "", css, flags=re.S)):
         sel = sel.strip()
         if "var(--warn)" in body:                                   # warning red is for warnings and the synthetic banner only
@@ -466,6 +466,8 @@ def test_identity_hues_avoid_green_and_red_and_are_not_outcome_colours():
             assert sel.startswith("#synthetic-banner"), sel
         if "var(--pair-" in body and not sel.startswith(":root"):
             assert sel.startswith(".pair-"), sel                    # pair hues are consumed only through .pair-* classes
+        if any(f"var(--{k})" in body for k in ("you", "kronos", "coin")):
+            assert sel.startswith(".tallies"), sel                  # scoreboard hues are used only on the three scoreboard cards
         if "var(--h1)" in body or "var(--h2)" in body:
             assert re.match(r"(\.verdict|\.tag|svg \.ci-main)", sel), sel
 
@@ -559,3 +561,91 @@ def test_motion_is_reduced_on_request_and_pages_have_no_external_fonts():
         assert kw in css
     assert "prefers-reduced-motion: reduce" in css and "animation: none !important" in css and "transition: none !important" in css
     assert "@font-face" not in css and "font-family" in css and "url(" not in css and "@import" not in css
+
+
+# ---------------------------------------------------------------- Phase 7f
+SCORE_TOKENS = ["you", "kronos", "coin"]
+
+
+def test_scoreboard_hues_are_distinct_from_pairs_and_each_other():
+    for theme, t in css_tokens().items():
+        colours = {k: t[k] for k in PAIR_TOKENS + SCORE_TOKENS}
+        d = C.distance_table(colours)
+        assert len(d) == 36
+        worst = min(d.items(), key=lambda kv: kv[1])
+        assert worst[1] >= 15, f"{theme}: {worst[0]} = {worst[1]:.1f}"
+        for k in SCORE_TOKENS:                                      # 10 degrees clear of the green and red guard ranges, and graphics contrast
+            hue = C.hue_degrees(t[k])
+            assert 30 <= hue <= 315 and not (70 <= hue <= 170), f"{theme} {k} hue {hue:.0f}"
+            assert C.cr(t[k], t["bg"]) >= 3, f"{theme} {k}"
+            tint = C.mix(t[k], t["card"], pct(t["tint-mix"]))
+            assert C.cr_rgb(t["fg"], tint) >= 4.5, f"{theme} scoreboard text on {k}"
+
+
+def test_no_content_is_hidden_by_default_in_css():
+    css = re.sub(r"/\*.*?\*/", "", (SITE / "style.css").read_text(), flags=re.S)
+    assert not re.search(r"opacity:\s*0\s*[;}!]", css), "opacity: 0 found (keyframes included)"
+    assert "visibility: hidden" not in css and "visibility:hidden" not in css
+    assert "IntersectionObserver" not in "".join(f.read_text() for f in site_text_files())
+    for sel, body in re.findall(r"([^{}@]+)\{([^{}]*)\}", css):
+        if "max-height" in body and "max-height: none" not in body:
+            assert sel.strip() in (".tablewrap",) and "overflow: auto" in body, sel          # only the scroll container may clip, and it scrolls
+        if "display: none" in body:
+            assert sel.strip().startswith(("#synthetic-banner[hidden]", ".warn[hidden]", ".toc", "nav, .row")) or "hidden" in sel, sel
+    assert ".band {" in css and "transparent" not in css.split(".band {")[1].split("}")[0]     # section bands no longer fade out at the bottom
+
+
+def test_script_lists_cover_every_global_each_page_script_uses():
+    deps = {"common.js": ["config.js"], "text.js": ["common.js"], "index.js": ["common.js", "notes.js", "plot.js", "svg.js", "text.js"],
+            "evidence.js": ["chips.js", "common.js", "svg.js", "text.js"], "game-ui.js": ["chips.js", "common.js", "game.js", "svg.js", "text.js"]}
+    for page in PAGES:
+        srcs = re.findall(r'<script[^>]*\ssrc="js/([^"]+)"', (SITE / page).read_text())
+        for script, need in deps.items():
+            if script in srcs:
+                for n in need:
+                    assert n in srcs and srcs.index(n) < srcs.index(script), f"{page}: {script} needs {n} loaded first"
+
+
+def test_fan_strings_are_neutral_and_descriptive_only():
+    t = (SITE / "js" / "text.js").read_text()
+    block = t[t.index("  fan: {"):t.index("  verdict: {")]
+    bad = re.compile(r"\b(correct|wrong|right|miss|win|beat)\b", re.I)
+    assert "sentence:" in block
+    for lit in js_strings(block):
+        assert not bad.search(lit), lit
+    ev = (SITE / "js" / "evidence.js").read_text()
+    assert "correct" not in ev.split("fan chart")[1].split("running score")[0].lower()
+
+
+def test_recorded_deviations_text_equals_deviations_md_modulo_whitespace_and_markers():
+    site_json = json.loads((ROOT / "site" / "data" / "site.json").read_text())
+    raw = (ROOT / "DEVIATIONS.md").read_text()
+    sections = re.split(r"^## ", raw, flags=re.M)[1:]
+    assert len(sections) == len(site_json["deviations"]) >= 2
+    for sec, d in zip(sections, site_json["deviations"]):
+        head, _, body = sec.partition("\n")
+        assert d["date"] + ": " + d["title"] == head.strip()
+        want = " ".join(re.sub(r"^\s*[-*] ", "", ln) for ln in body.splitlines() if ln.strip()).split()
+        got = []
+        for b in d["blocks"]:
+            got += b["text"].split() if b["type"] == "p" else [w for it in b["items"] for w in it.split()]
+        assert got == want, d["date"]
+        assert " ".join(got) == d["text"]
+    assert any(b["type"] == "ul" and len(b["items"]) == 6 for d in site_json["deviations"] for b in d["blocks"])
+
+
+def test_serve_script_sends_no_store():
+    import threading
+    import urllib.request
+    spec = importlib.util.spec_from_file_location("serve_site", ROOT / "scripts" / "serve_site.py")
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    srv = m.make_server("127.0.0.1", 0)
+    th = threading.Thread(target=srv.serve_forever, daemon=True)
+    th.start()
+    try:
+        r = urllib.request.urlopen(f"http://127.0.0.1:{srv.server_address[1]}/index.html", timeout=5)
+        assert r.status == 200 and "no-store" in r.headers["Cache-Control"]
+    finally:
+        srv.shutdown()
+        srv.server_close()

@@ -7,6 +7,16 @@ KL.text = {
   badgePrimary: "primary", badgeExploratory: "exploratory",
   verdictTag: { h1: "H1", h2: "H2" },
   toc: "On this page",
+  allNumbers: "All numbers in one place",
+  scriptError: (part, msg) => "Part of this page could not be built (" + part + ": " + msg + "). Reload the page with the cache cleared; if it persists, the page files may be out of date.",
+  fan: {
+    legend: { sample: "Sampled path (dotted, in the pair's hue)", mean: "Mean of the samples (solid, heavy)", actual: "Actual path (dash-dot)", zero: "No change (dashed line)" },
+    endMean: "mean", endActual: "actual",
+    above: "above", below: "below", at: "at", up: "up", down: "down", flat: "flat",
+    sentence: (mean, actual, signal) => "The mean of the samples ends " + mean + " its start; the actual path ends " + actual + " its start; the signal pointed " + signal + ".",
+    chartLabel: "Fan chart of the eleven sampled price paths, their mean, and the actual path, as change from the last context close",
+    axisX: "bar of the forecast day", axisY: "change vs last close",
+  },
   callout: { deviation: "Recorded deviation", limit: "Limit", disclosure: "Disclosure" },
   game: { progress: (a, t) => "Answered " + a + " of " + t, thisWas: "This was ", on: " on " },
   verdict: { h1: "Versus a coin flip", h2: "Versus always-up" },
@@ -77,8 +87,13 @@ KL.hints = KL.text;   // older name
         m.appendChild(el("h2", { id: "recorded-deviations", text: "Recorded deviations" }));
         if (!site.deviations.length) m.appendChild(el("p", { text: "No deviations are recorded." }));
         site.deviations.forEach((d) => {
-          m.appendChild(el("div", { class: "callout deviation" }, [el("div", { class: "label", text: KL.text.callout.deviation }),
-            el("h3", { text: d.date + (d.title ? ": " + d.title : "") }), el("p", { text: d.text })]));
+          const box = el("div", { class: "callout deviation" }, [el("div", { class: "label", text: KL.text.callout.deviation }),
+            el("h3", { text: d.date + (d.title ? ": " + d.title : "") })]);
+          (d.blocks || []).forEach((blk) => {
+            if (blk.type === "ul") { const ul = el("ul"); blk.items.forEach((it) => ul.appendChild(richInto(el("li"), it))); box.appendChild(ul); }
+            else box.appendChild(richInto(el("p"), blk.text));
+          });
+          m.appendChild(box);
         });
       }
     });

@@ -14,7 +14,7 @@
   <script src="js/text.js" defer></script>
   <script src="js/index.js" defer></script>
 </head>
-<body>
+<body class="page-result">
   <div id="synthetic-banner" role="status" hidden></div>
   <header class="site">
     <h1>Kronos Lab</h1>
@@ -52,22 +52,25 @@
         </figure>
       </div>
       <div id="statcards" class="statcards"></div>
-      <dl class="stats">
+      <details class="allnums">
+        <summary id="allnums-title"></summary>
+        <dl class="stats">
         <dt>Origins scored (analysis set)</dt><dd data-bind="headline.n" data-fmt="int"></dd>
         <dt>Primary horizon (bars ahead)</dt><dd data-bind="protocol.primary_horizon"></dd>
         <dt>Kronos accuracy</dt><dd><span data-bind="primary.accuracy" data-fmt="pct"></span>, interval <span data-bind="primary.ci_accuracy" data-fmt="ci"></span></dd>
+        <dt>Versus a coin flip (exact test, Holm adjusted)</dt><dd data-bind="primary.p_h1_holm" data-fmt="p"></dd>
         <dt>Always-up accuracy</dt><dd data-bind="primary.always_up_accuracy" data-fmt="pct"></dd>
         <dt>Kronos minus always-up</dt><dd><span data-bind="primary.accuracy_diff" data-fmt="pp"></span>, interval <span data-bind="primary.ci_diff" data-fmt="cipp"></span></dd>
-        <dt>Versus a coin flip (exact test, Holm adjusted)</dt><dd data-bind="primary.p_h1_holm" data-fmt="p"></dd>
         <dt>Versus always-up (exact test, Holm adjusted)</dt><dd data-bind="primary.p_h2_holm" data-fmt="p"></dd>
         <dt>Kronos down-calls</dt><dd data-bind="headline.D" data-fmt="int"></dd>
         <dt>Down-calls where Kronos was right and always-up wrong</dt><dd data-bind="primary.discordant_kronos_right_alwaysup_wrong" data-fmt="int"></dd>
         <dt>Down-calls where Kronos was wrong and always-up right</dt><dd data-bind="primary.discordant_kronos_wrong_alwaysup_right" data-fmt="int"></dd>
-      </dl>
+        </dl>
+      </details>
       <p class="small" id="note-alwaysup" hidden></p>
       <p class="small">Intervals come from a bootstrap that resamples whole forecast days, so pairs that move together are not counted as independent evidence.</p>
     </section>
-    <section aria-labelledby="h-power">
+    <section class="band" aria-labelledby="h-power">
       <h2 id="h-power">How small an edge could this test see?</h2>
       <div id="power-table"></div>
       <p class="small" id="power-down"></p>

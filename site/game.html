@@ -10,10 +10,11 @@
   <script src="js/chips.js" defer></script>
   <script src="js/common.js" defer></script>
   <script src="js/svg.js" defer></script>
+  <script src="js/text.js" defer></script>
   <script src="js/game.js" defer></script>
   <script src="js/game-ui.js" defer></script>
 </head>
-<body>
+<body class="page-game">
   <div id="synthetic-banner" role="status" hidden></div>
   <header class="site">
     <h1>Game</h1>
@@ -28,7 +29,7 @@
   <main>
     <p id="load-error" class="warn" role="alert" hidden></p>
 
-    <section aria-labelledby="h-game">
+    <section class="band" aria-labelledby="h-game">
       <h2 id="h-game">Can you call the direction better than a coin flip?</h2>
       <p>You see recent hourly candles with the pair and date hidden. Call whether the close will end the forecast day above or below the dashed line. Then see what happened, what Kronos said, and what a coin flip said. A hollow candle closed above its open; a filled candle closed below it.</p>
       <div class="card"><p id="progress" class="small"></p><div class="progressbar" id="progressbar" role="progressbar" aria-label="Game progress" aria-valuemin="0" aria-valuenow="0"><span></span></div><div id="tallies" class="tallies" aria-label="Running tallies of correct calls"></div></div>

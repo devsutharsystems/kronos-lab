@@ -114,17 +114,38 @@ def prereg_sections(text: str) -> dict:
 
 
 def deviations(text: str) -> list:
-    """Entries of DEVIATIONS.md: [{date, title, text}] in file order."""
+    """Entries of DEVIATIONS.md: [{date, title, text, blocks}] in file order.
+    `blocks` keeps the structure ({"type": "p", "text"} or {"type": "ul", "items": [...]}); `text` is the same content as one
+    whitespace-normalised string with list markers removed."""
     out, cur = [], None
     for line in text.splitlines():
         m = re.match(r"^## (.+)$", line)
         if m:
             head = m.group(1)
             d = re.match(r"^(.+? [+-]\d{4}): (.*)$", head)
-            cur = {"date": d.group(1) if d else head, "title": d.group(2) if d else "", "text": ""}
+            cur = {"date": d.group(1) if d else head, "title": d.group(2) if d else "", "text": "", "blocks": [], "_open": None}
             out.append(cur); continue
-        if cur is not None and line.strip():
-            cur["text"] = (cur["text"] + " " + line.strip()).strip()
+        if cur is None:
+            continue
+        if not line.strip():
+            cur["_open"] = None; continue
+        item = re.match(r"^\s*[-*] (.*)$", line)
+        if item:
+            if cur["_open"] != "ul":
+                cur["blocks"].append({"type": "ul", "items": []}); cur["_open"] = "ul"
+            cur["blocks"][-1]["items"].append(item.group(1).strip())
+        elif cur["_open"] == "ul" and line.startswith("  ") and cur["blocks"][-1]["items"]:
+            cur["blocks"][-1]["items"][-1] += " " + line.strip()           # a wrapped list item
+        elif cur["_open"] == "p":
+            cur["blocks"][-1]["text"] += " " + line.strip()
+        else:
+            cur["blocks"].append({"type": "p", "text": line.strip()}); cur["_open"] = "p"
+    for e in out:
+        e.pop("_open")
+        parts = []
+        for blk in e["blocks"]:
+            parts += [blk["text"]] if blk["type"] == "p" else blk["items"]
+        e["text"] = " ".join(" ".join(parts).split())
     return out
 
 
