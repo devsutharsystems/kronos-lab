@@ -29,7 +29,7 @@
 | REQ-M12 | Every number on README/site comes from results/ | A test scans for numeric literals not backed by a results file | TBD | tests/ |
 
 ## Open questions (unverified after steps 1-4)
-- REQ-P* rows are empty until Prateek's spec is pasted.
+- REQ-P* rows are empty: no external spec was supplied.
 - Python is 3.15.0, newer than the Kronos-pinned dependencies assume. Torch wheel availability for 3.15 on Apple Silicon is unverified (torch not installed in this phase).
 - The Kronos requirements pin pandas==2.2.2; the dev venv has pandas 3.1.1. Compatibility is unverified.
 - Kronos source has not been read; only file sizes (model/kronos.py 662 lines, model/module.py 570) are known.
