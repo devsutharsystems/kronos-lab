@@ -145,7 +145,7 @@ def test_readme_banned_wording_and_required_notices():
     assert "Data: Binance Vision (data.binance.vision); not affiliated with or endorsed by Binance." in t
     assert "rerun everything from the hashes" not in low
     assert "bit-for-bit reproduction on other hardware is not claimed" in t
-    assert "The forecast file is not in this repository" in t and "if it is supplied" in t
+    assert "The forecast file is attached, gzipped, to the [release]" in t and "not in this repository" not in t
     assert "can be rerun if the forecast file is obtained" not in t
 
 
@@ -155,3 +155,28 @@ def test_readme_has_no_exploratory_figures():
         assert word not in t, word
     for pair in ("BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT", "BNBUSDT", "DOGEUSDT"):
         assert t.count(pair.lower()) <= 3          # pairs appear only in the quoted list and the hash table
+
+
+# Every URL in the README must be on this list (the number trace strips URLs, so they are checked here). One comment per entry.
+ALLOWED_URLS = {
+    "https://devsutharsystems.github.io/kronos-lab/": "the live site (GitHub Pages project URL; owner and repo come from site/js/config.js)",
+    "https://github.com/devsutharsystems/kronos-lab/releases/tag/v1.0.0": "the release that carries the gzipped forecast file",
+}
+ALLOWED_URL_PREFIXES = {
+    "https://github.com/devsutharsystems/kronos-lab/blob/56fcbdee4cb4055eb75669af5e411c45f845994b/": "the pre-registration file at the pre-registration commit",
+    "https://github.com/devsutharsystems/kronos-lab/commit/": "the DEVIATIONS commits, found in git by subject (hash is checked below)",
+}
+
+
+def test_every_url_in_the_readme_is_allowed():
+    for u in re.findall(r"https?://[^\s)>\]`]+", README.read_text()):
+        ok = u in ALLOWED_URLS or any(u.startswith(p) for p in ALLOWED_URL_PREFIXES)
+        assert ok, f"URL not on the allowlist: {u}"
+        if u.startswith("https://github.com/devsutharsystems/kronos-lab/commit/"):
+            assert is_commit(u.rsplit("/", 1)[1]), u
+    t = README.read_text()
+    assert "<https://devsutharsystems.github.io/kronos-lab/>" in t and "/releases/tag/v1.0.0>" in t
+    assert t.index("## Links") < t.index("## Result")
+    # the site URL and the repo come from the same config file as the pre-registration link
+    cfg = (ROOT / "site" / "js" / "config.js").read_text()
+    assert "github.com/devsutharsystems/kronos-lab/blob/56fcbdee4cb4055eb75669af5e411c45f845994b/" in cfg

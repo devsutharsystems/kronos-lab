@@ -26,4 +26,4 @@ jobs:
       - name: Committed site data equals results/final/results.json and is not synthetic
         run: pytest -q tests/test_site.py -k "real_site_json_equals_results_json_exactly or tracked_site_json_must_not_be_synthetic"
       - name: Node tests
-        run: node --test tests/node/game.test.js tests/node/svg.test.js tests/node/notes.test.js tests/node/plot.test.js tests/node/chips.test.js tests/node/pages.test.js
+        run: node --test tests/node/game.test.js tests/node/svg.test.js tests/node/notes.test.js tests/node/plot.test.js tests/node/chips.test.js tests/node/pages.test.js tests/node/subpath.test.js

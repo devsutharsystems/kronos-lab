@@ -19,6 +19,7 @@ ROOT = Path(__file__).resolve().parent.parent
 PREREG_COMMIT = "56fcbdee4cb4055eb75669af5e411c45f845994b"
 DEV_SUBJECTS = ("Deviation note: run-critical file count", "Deviation note: run closed at cutoff")
 SERVE_PORT = 8010
+RELEASE_TAG = "v1.0.0"                      # the release that carries the gzipped forecast file
 FIRST_REAL_SUBJECT = "Pre-registered results (analysis run once)"
 TOLERANCE_SUBJECT = "Phase 8c: tolerance for cross-platform floats in synthetic golden test"
 RUN_CRITICAL = ["kronos_lab/runner.py", "kronos_lab/kronos_adapter.py", "kronos_lab/data.py", "scripts/launch_run.sh", "docs/DECISIONS.md"]
@@ -221,6 +222,9 @@ def fields(root: Path = ROOT) -> dict:
                  f"Kronos direction accuracy {pct(P['accuracy'])} ({level}% day-block interval {pct(P['ci_accuracy'][0])} to {pct(P['ci_accuracy'][1])}) "
                  f"on {P['n']} origins.")
     f.update(provenance(dev, root))
+    owner_repo = url.split("github.com/")[1]
+    f["site_url"] = "https://" + owner_repo.split("/")[0].lower() + ".github.io/" + owner_repo.split("/")[1] + "/"
+    f["release_url"] = f"{url}/releases/tag/{RELEASE_TAG}"
     f["prereg_short"] = PREREG_COMMIT[:8]
     f["prereg_url"] = prereg_url
     f["dev1_title"], f["dev2_title"] = "run-critical file count", "run closed after the cutoff"
@@ -231,7 +235,7 @@ def fields(root: Path = ROOT) -> dict:
     rows += [("Kronos-small weights (model.safetensors)", re.search(r"Kronos-small `model\.safetensors` sha256 `([0-9a-f]{64})`", prereg).group(1)),
              ("Kronos-Tokenizer-base weights (model.safetensors)", re.search(r"Kronos-Tokenizer-base `model\.safetensors` sha256 `([0-9a-f]{64})`", prereg).group(1)),
              ("requirements-kronos.txt", re.search(r"`requirements-kronos\.txt` sha256 `([0-9a-f]{64})`", prereg).group(1)),
-             ("results/runs/forecasts.jsonl (not in the repository)", re.search(r"sha256 ([0-9a-f]{64}), \d+ lines", dev).group(1)),
+             ("results/runs/forecasts.jsonl (release asset, gzipped; hash of the file after gunzip)", re.search(r"sha256 ([0-9a-f]{64}), \d+ lines", dev).group(1)),
              ("results/final/results.json", hashlib.sha256((root / "results" / "final" / "results.json").read_bytes()).hexdigest())]
     f["hash_table"] = "| File | sha256 |\n|---|---|\n" + "\n".join(f"| {a} | `{b}` |" for a, b in rows)
     f["limits_quote"] = "\n".join("- " + b for b in prereg_section(prereg, 11))

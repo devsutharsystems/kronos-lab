@@ -157,4 +157,34 @@ async function runPage(htmlFile, siteFile, opts = {}) {
   return { doc, errors, scripts, win, ctx };
 }
 
-module.exports = { runPage, Element, TextNode };
+// Same as runPage, but everything (page, scripts, data) is fetched over real HTTP from `pageUrl`, resolving relative URLs against it.
+// Used to check that the site works under a sub-path such as /kronos-lab/. Loopback only.
+async function runPageHttp(pageUrl, opts = {}) {
+  const doc = makeDocument();
+  const htmlRes = await fetch(pageUrl);
+  if (!htmlRes.ok) throw new Error("page " + pageUrl + " -> " + htmlRes.status);
+  const scripts = parseHtml(await htmlRes.text(), doc);
+  const errors = [];
+  const fetched = [];
+  const onRej = (e) => errors.push(e);
+  process.on("unhandledRejection", onRej);
+  const win = {
+    document: doc, Node: function Node() {}, console, setTimeout, clearTimeout,
+    fetch: async (url, init) => { const u = new URL(url, pageUrl); fetched.push(u.pathname); return fetch(u, init); },
+  };
+  win.window = win; win.globalThis = win;
+  Object.defineProperty(win.Node, Symbol.hasInstance, { value: (o) => !!o && (o.nodeType === 1 || o.nodeType === 3) });
+  const ctx = vm.createContext(win);
+  for (const s of scripts) {
+    const u = new URL(s, pageUrl);
+    const r = await fetch(u);
+    fetched.push(u.pathname);
+    if (!r.ok) { errors.push(new Error("script " + u.pathname + " -> " + r.status)); continue; }
+    try { vm.runInContext(await r.text(), ctx, { filename: s }); } catch (e) { errors.push(e); }
+  }
+  await new Promise((r) => setTimeout(r, opts.wait || 80));
+  process.off("unhandledRejection", onRej);
+  return { doc, errors, scripts, fetched };
+}
+
+module.exports = { runPage, runPageHttp, Element, TextNode };

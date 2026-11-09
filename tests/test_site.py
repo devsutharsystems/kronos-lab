@@ -342,7 +342,7 @@ def test_game_logic_node_tests():
     node = shutil.which("node")
     if not node:
         pytest.skip("node not installed")
-    r = subprocess.run([node, "--test", str(ROOT / "tests" / "node" / "game.test.js"), str(ROOT / "tests" / "node" / "svg.test.js"), str(ROOT / "tests" / "node" / "notes.test.js"), str(ROOT / "tests" / "node" / "plot.test.js"), str(ROOT / "tests" / "node" / "chips.test.js"), str(ROOT / "tests" / "node" / "pages.test.js")], capture_output=True, text=True, cwd=ROOT)
+    r = subprocess.run([node, "--test", str(ROOT / "tests" / "node" / "game.test.js"), str(ROOT / "tests" / "node" / "svg.test.js"), str(ROOT / "tests" / "node" / "notes.test.js"), str(ROOT / "tests" / "node" / "plot.test.js"), str(ROOT / "tests" / "node" / "chips.test.js"), str(ROOT / "tests" / "node" / "pages.test.js"), str(ROOT / "tests" / "node" / "subpath.test.js")], capture_output=True, text=True, cwd=ROOT)
     assert r.returncode == 0, r.stdout[-2000:] + r.stderr[-1000:]
 
 
@@ -649,3 +649,18 @@ def test_serve_script_sends_no_store():
     finally:
         srv.shutdown()
         srv.server_close()
+
+
+# ---------------------------------------------------------------- Phase 10: the site must work under a sub-path (/kronos-lab/)
+def test_no_root_absolute_urls_in_site_files():
+    pat = re.compile(r"""(?:(?:href|src|action)=["']/(?!/)|fetch\(\s*["'`]/|url\(\s*["']?/(?!/)|=["']//|location\.(?:origin|pathname|host))""")
+    for f in site_text_files() + [SITE / "style.css"]:
+        for m in pat.finditer(f.read_text()):
+            raise AssertionError(f"{f.name}: root-absolute URL or location use: {m.group(0)!r}")
+    for f in sorted((SITE / "js").glob("*.js")):
+        for lit in js_strings(f.read_text()):
+            assert not re.match(r"^/(style\.css|js/|data/|index\.html)", lit), f"{f.name}: {lit!r}"
+    for p in PAGES:
+        html = (SITE / p).read_text()
+        for ref in re.findall(r'(?:href|src)="([^"#]*)"', html):
+            assert not ref.startswith("/"), f"{p}: {ref}"
